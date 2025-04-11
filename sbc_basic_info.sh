@@ -526,6 +526,10 @@ echo "--------------------------------------------------------------------------
 grep -i "Resource limit" /archive/logger/*/bnetscs_* | tail -10 >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 
+grep -i "fqdn" /archive/logger/*/bnetscs_*  | grep -v "Info"  | tail -10  >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+
+
 grep -i "postgres" /archive/logger/*/bnetscs_* | grep -v "Info" | tail -10 >> $LOG_FILE
 
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
