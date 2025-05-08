@@ -25,8 +25,58 @@ lscpu >> $LOG_FILE
 echo "=======================================================================================" >> $LOG_FILE
 echo "***MEMORY-PRINTOUT***" >> $LOG_FILE
 free -h >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+free -k >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 echo "=======================================================================================" >> $LOG_FILE
 echo "=======================================================================================" >> $LOG_FILE
+
+
+echo "***Full summary of available and used disk space usage of the file system***" >> $LOG_FILE
+df -h >> $LOG_FILE
+echo "=======================================================================================" >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+echo "***STORAGE-INFO***" >> $LOG_FILE
+du -sh /archive/software/ >> $LOG_FILE
+du -sh /cores >> $LOG_FILE
+du -sh /var/crash/ >> $LOG_FILE
+du -sh /eventdata/ >> $LOG_FILE
+du -sh /archive/backup/config >> $LOG_FILE
+du -sh /archive/SIP_capture >> $LOG_FILE
+du -sh /archive/Trace_captures >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+
+du -h / --exclude=/proc --exclude=/sys --exclude=/dev --exclude=/run --max-depth=1 | sort -rh | head -20 >> $LOG_FILE
+
+
+echo "=======================================================================================" >> $LOG_FILE
+
+echo "***MEMORY-PRINTOUT***" >> $LOG_FILE
+free -h >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+top -b -o %MEM | head -n 16 >> $LOG_FILE
+echo "=======================================================================================" >> $LOG_FILE
+
+echo "***CPU-PRINTOUT***" >> $LOG_FILE
+top -b -o %CPU | head -n 16 >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+cat /proc/kbnet/cpu_usage >> $LOG_FILE
+echo "=======================================================================================" >> $LOG_FILE
+
+echo "=======================================================================================" >> $LOG_FILE
+echo "***SYSTEM-UPTIME-INFO***" >> $LOG_FILE
+uptime >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+echo "***Time Of Last System Boot***" >> $LOG_FILE
+who -b >> $LOG_FILE
+echo "=======================================================================================" >> $LOG_FILE
+
+echo "***System Reboots***" >> $LOG_FILE
+last reboot >> $LOG_FILE
+echo "=======================================================================================" >> $LOG_FILE
+
+
+
 
 echo "***-SBC-PLATFORM-INFORMATION***" >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
@@ -142,17 +192,6 @@ cat /config/mibs/current/localmgmt/networkwidelicense/NetworkWideLicensingCfg.xm
 echo " =======================================================================================" >> $LOG_FILE
 
 
-echo "=======================================================================================" >> $LOG_FILE
-echo "***SYSTEM-UPTIME-INFO***" >> $LOG_FILE
-uptime >> $LOG_FILE
-echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
-echo "***Time Of Last System Boot***" >> $LOG_FILE
-who -b >> $LOG_FILE
-echo "=======================================================================================" >> $LOG_FILE
-
-echo "***System Reboots***" >> $LOG_FILE
-last reboot >> $LOG_FILE
-echo "=======================================================================================" >> $LOG_FILE
 
 echo "***SYSTEM-UPGRADE-INFO***" >> $LOG_FILE
 cd /var/adm/bnet
@@ -203,30 +242,18 @@ echo "--------------------------------------------------------------------------
 echo "=======================================================================================" >> $LOG_FILE
 
 
-echo "***STORAGE-INFO***" >> $LOG_FILE
-du -sh /archive/software/ >> $LOG_FILE
-du -sh /cores >> $LOG_FILE
-du -sh /var/crash/ >> $LOG_FILE
-du -sh /eventdata/ >> $LOG_FILE
-du -sh /archive/backup/config >> $LOG_FILE
-du -sh /archive/SIP_capture >> $LOG_FILE
-du -sh /archive/Trace_captures >> $LOG_FILE
-echo "=======================================================================================" >> $LOG_FILE
 
-echo "***Full summary of available and used disk space usage of the file system***" >> $LOG_FILE
-df -h >> $LOG_FILE
-echo "=======================================================================================" >> $LOG_FILE
 
-echo "***MEMORY-PRINTOUT***" >> $LOG_FILE
-free -h >> $LOG_FILE
+echo "***SKEW ADJUSTMENT CHECK***" >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
-top -b -o %MEM | head -n 16 >> $LOG_FILE
-echo "=======================================================================================" >> $LOG_FILE
-
-echo "***CPU-PRINTOUT***" >> $LOG_FILE
-top -b -o %CPU | head -n 16 >> $LOG_FILE
+cat /opt/bnet/bin/runcommonenv | grep SLEEP_TIMER_VALUE >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
-cat /proc/kbnet/cpu_usage >> $LOG_FILE
+grep SLEEP /archive/logger/*/bnett* >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+echo " =======================================================================================" >> $LOG_FILE
+
+
+
 
 echo "=======================================================================================" >> $LOG_FILE
 
@@ -526,8 +553,10 @@ echo "--------------------------------------------------------------------------
 grep -i "Resource limit" /archive/logger/*/bnetscs_* | tail -10 >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 
+
 grep -i "fqdn" /archive/logger/*/bnetscs_*  | grep -v "Info"  | tail -10  >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+
 
 
 grep -i "postgres" /archive/logger/*/bnetscs_* | grep -v "Info" | tail -10 >> $LOG_FILE
@@ -578,6 +607,44 @@ echo "--------------------------------------------------------------------------
 
 grep -i "ERROR" /var/log/messages | tail -10 >> $LOG_FILE
 
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+
+grep -i "avahi-daemon" /var/log/messages | tail -15 >> $LOG_FILE
+
+echo "=======================================================================================" >> $LOG_FILE
+
+
+
+
+
+echo "***SBC-bnsbc_license_SNIPPET***" >> $LOG_FILE
+ls -ltrh bnsbc_license* >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+
+echo "***License_Detils***" >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+echo "*Sessions*" >> $LOG_FILE
+cat /var/log/bnsbc_license* | grep BNNSL | tail -5 >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+echo "*EMS*" >> $LOG_FILE
+cat /var/log/bnsbc_license* | grep BNEMS | tail -5 >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+echo "*IPSec-Tunnels*" >> $LOG_FILE
+cat /var/log/bnsbc_license* | grep BNIPS | tail -5 >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+echo "*Transcoding-Gateway-Sessions*" >> $LOG_FILE
+cat /var/log/bnsbc_license* | grep BNTSL | tail -5 >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+echo "*Srtp-Sessions*" >> $LOG_FILE
+cat /var/log/bnsbc_license* | grep BNSRS | tail -5 >> $LOG_FILE
+
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+grep -i "EmsConnectionLostGraceTime=0" /var/log/bnsbc_license* | tail -10 >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+grep -i "EmsConnectionLostGraceTime" /var/log/bnsbc_license* | tail -25 >> $LOG_FILE
+
+
+
 echo "=======================================================================================" >> $LOG_FILE
 
 
@@ -602,12 +669,12 @@ cat /etc/snmp/snmpd.conf | grep com2sec >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 cat /etc/snmp/snmpd.conf | grep group >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
-cat /etc/snmp/snmpd.conf | grep rouser >> $LOG_FILE
+cat /etc/snmp/snmpd.conf | grep "rouser\| rwuser"  >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 echo "***SNMP-/var/lib/net-snmp-SNIPPET***" >> $LOG_FILE
 
-cat /var/lib/net-snmp/snmpd.conf | grep user >> $LOG_FILE
+cat /var/lib/net-snmp/snmpd.conf | grep -i user >> $LOG_FILE
 
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 
