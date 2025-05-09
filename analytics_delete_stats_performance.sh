@@ -37,6 +37,7 @@ curl -s $theIPaddress:9200/_cat/indices/stats-dialogic-performance-*?h=index \
     curl -XDELETE $theIPaddress:9200/$index
 done
 
+echo "=======================================================================================" >> $LOG_FILE
 echo "stats-dialogic-performance indices" >> $LOG_FILE
 curl -XGET $theIPaddress:9200/_cat/indices/stats-dialogic-performance* | wc -l >> $LOG_FILE
 echo "=======================================================================================" >> $LOG_FILE
