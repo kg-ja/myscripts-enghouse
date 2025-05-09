@@ -20,6 +20,11 @@ echo "Hostname of this server is $HOST_NAME" >> $LOG_FILE
 echo "=======================================================================================" >> $LOG_FILE
 
 echo "stats-dialogic-performance indices" >> $LOG_FILE
+curl -XGET $theIPaddress:9200/_cat/indices/stats-dialogic-performance* | wc -l >> $LOG_FILE
+echo "=======================================================================================" >> $LOG_FILE
+
+
+echo "stats-dialogic-performance indices to delete" >> $LOG_FILE
 curl -XGET $theIPaddress:9200/_cat/indices/stats-dialogic-performance* | sort | head -$NumtoDelete >> $LOG_FILE
 echo "=======================================================================================" >> $LOG_FILE
 
@@ -32,7 +37,9 @@ curl -s $theIPaddress:9200/_cat/indices/stats-dialogic-performance-*?h=index \
     curl -XDELETE $theIPaddress:9200/$index
 done
 
-
+echo "stats-dialogic-performance indices" >> $LOG_FILE
+curl -XGET $theIPaddress:9200/_cat/indices/stats-dialogic-performance* | wc -l >> $LOG_FILE
+echo "=======================================================================================" >> $LOG_FILE
 chmod 755 $LOG_FILE
 
 mv $LOG_FILE /tmp/DELETE-STATSPERFORMANCE-$HOST_NAME-$(date +"%Y_%m_%d_%I_%M_%p").log
