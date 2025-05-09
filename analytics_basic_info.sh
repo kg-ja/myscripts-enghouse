@@ -268,25 +268,25 @@ echo "==========================================================================
 echo "=======================================================================================" >> $LOG_FILE
 echo "===============================dialogic-sbc==========================================" >> $LOG_FILE
 echo "=======================================================================================" >> $LOG_FILE
-curl -XGET $theIPaddress:9200/_cat/indices/dialogic-sbc* | head -10 >> $LOG_FILE
+curl -XGET $theIPaddress:9200/_cat/indices/dialogic-sbc* | sort | head -10 >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
-curl -XGET $theIPaddress:9200/_cat/indices/dialogic-sbc* | tail -10 >> $LOG_FILE
+curl -XGET $theIPaddress:9200/_cat/indices/dialogic-sbc* | sort | tail -10 >> $LOG_FILE
 
 echo "=======================================================================================" >> $LOG_FILE
 echo "===============================dialogic-performance==========================================" >> $LOG_FILE
 echo "=======================================================================================" >> $LOG_FILE
-curl -XGET $theIPaddress:9200/_cat/indices/dialogic-performance* | head -10 >> $LOG_FILE
+curl -XGET $theIPaddress:9200/_cat/indices/dialogic-performance* | sort | head -10  >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
-curl -XGET $theIPaddress:9200/_cat/indices/dialogic-performance* | tail -10 >> $LOG_FILE
+curl -XGET $theIPaddress:9200/_cat/indices/dialogic-performance* | sort | tail -10 >> $LOG_FILE
 
 
 
 echo "=======================================================================================" >> $LOG_FILE
 echo "===============================stats-dialogic-performance==========================================" >> $LOG_FILE
 echo "=======================================================================================" >> $LOG_FILE
-curl -XGET $theIPaddress:9200/_cat/indices/stats-dialogic-performance* | head -10 >> $LOG_FILE
+curl -XGET $theIPaddress:9200/_cat/indices/stats-dialogic-performance* | sort | head -20  >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
-curl -XGET $theIPaddress:9200/_cat/indices/stats-dialogic-performance* | tail -10 >> $LOG_FILE
+curl -XGET $theIPaddress:9200/_cat/indices/stats-dialogic-performance* | sort | tail -10 >> $LOG_FILE
 
 
 
