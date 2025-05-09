@@ -99,6 +99,12 @@ cat /etc/cron.hourly/clean_ES_data.sh | grep lower_threshold= >> $LOG_FILE
 cat /etc/cron.hourly/clean_ES_data.sh | grep upper_threshold= >> $LOG_FILE
 echo "=======================================================================================" >> $LOG_FILE
 
+echo "***TOTAL-SHARDS***" >> $LOG_FILE
+curl -XGET $theIPaddress:9200/_cluster/stats?filter_path=indices.shards.total  >> $LOG_FILE
+echo "=======================================================================================" >> $LOG_FILE
+
+
+
 echo "***MAX/TOTAL-SHARD-PER-NODE***" >> $LOG_FILE
 echo "That setting is also set to -1 by default soemtimes, which means that there is no limit as to how many shards of a given index can be hosted on a specific data node" >> $LOG_FILE
 echo "Thats if no max shard per node set" >> $LOG_FILE
@@ -221,8 +227,10 @@ echo "==========================================================================
 
 
 echo "***TOTAL-SHARDS-INFO***" >> $LOG_FILE
-curl $theIPaddress:9200/_cat/shards?v | wc -l >> $LOG_FILE
-echo "=======================================================================================" >> $LOG_FILE
+curl $theIPaddress:9200/_cat/shards?v | wc -l  >> $LOG_FILE
+
+
+echo " =======================================================================================" >> $LOG_FILE
 
 echo "***UNASSIGNED-SHARD-INFO***" >> $LOG_FILE
 curl -XGET $theIPaddress:9200/_cat/shards?h=index,shard,prirep,state,unassigned.reason| grep UNASSIGNED >> $LOG_FILE
@@ -260,16 +268,27 @@ echo "==========================================================================
 echo "=======================================================================================" >> $LOG_FILE
 echo "===============================dialogic-sbc==========================================" >> $LOG_FILE
 echo "=======================================================================================" >> $LOG_FILE
-curl -XGET $theIPaddress:9200/_cat/indices/dialogic-sbc* | head -25 >> $LOG_FILE
+curl -XGET $theIPaddress:9200/_cat/indices/dialogic-sbc* | head -10 >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
-curl -XGET $theIPaddress:9200/_cat/indices/dialogic-sbc* | tail -5 >> $LOG_FILE
+curl -XGET $theIPaddress:9200/_cat/indices/dialogic-sbc* | tail -10 >> $LOG_FILE
 
 echo "=======================================================================================" >> $LOG_FILE
 echo "===============================dialogic-performance==========================================" >> $LOG_FILE
 echo "=======================================================================================" >> $LOG_FILE
-curl -XGET $theIPaddress:9200/_cat/indices/dialogic-performance* | head -25 >> $LOG_FILE
+curl -XGET $theIPaddress:9200/_cat/indices/dialogic-performance* | head -10 >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
-curl -XGET $theIPaddress:9200/_cat/indices/dialogic-performance* | tail -5 >> $LOG_FILE
+curl -XGET $theIPaddress:9200/_cat/indices/dialogic-performance* | tail -10 >> $LOG_FILE
+
+
+
+echo "=======================================================================================" >> $LOG_FILE
+echo "===============================stats-dialogic-performance==========================================" >> $LOG_FILE
+echo "=======================================================================================" >> $LOG_FILE
+curl -XGET $theIPaddress:9200/_cat/indices/stats-dialogic-performance* | head -10 >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+curl -XGET $theIPaddress:9200/_cat/indices/stats-dialogic-performance* | tail -10 >> $LOG_FILE
+
+
 
 echo "=======================================================================================" >> $LOG_FILE
 echo "=======================================================================================" >> $LOG_FILE
@@ -277,7 +296,7 @@ echo "==========================================================================
 
 
 
-echo "===============================DIALOGICC-TEMPLATE==========================================" >> $LOG_FILE
+echo "===============================DIALOGIC-TEMPLATE==========================================" >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 curl -XGET $theIPaddress:9200/_template/template_1?pretty=true >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
