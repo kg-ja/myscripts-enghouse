@@ -143,7 +143,7 @@ if grep -Fxq "$SEARCH_LINE" "$FILE"; then
 else  
     
    get_server_info
-   echo "Skew pareameter value not set, action will now be taken" | tee -a $LOG_FILE
+   echo "Skew parameter value not set, action will now be taken to add it" | tee -a $LOG_FILE
    skew_change
 
    echo "Skew value is now set" | tee -a $LOG_FILE
