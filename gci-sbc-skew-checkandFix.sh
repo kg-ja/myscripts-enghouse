@@ -43,13 +43,13 @@ echo "==========================================================================
 
 
 echo "=======================================================================================" >> $LOG_FILE
-echo "***Printout /opt/bnet/bin/runcommonenv ***" >> $LOG_FILE
+echo "Printout /opt/bnet/bin/runcommonenv" >> $LOG_FILE
 cat /opt/bnet/bin/runcommonenv >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 echo "=======================================================================================" >> $LOG_FILE
 
 echo "=======================================================================================" >> $LOG_FILE
-echo "***SLEEP_TIMER_VALUE CHECK ***" >> $LOG_FILE
+echo "*SLEEP_TIMER_VALUE CHECK*" >> $LOG_FILE
 cat /opt/bnet/bin/runcommonenv | grep SLEEP_TIMER_VALUE >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 grep SLEEP /archive/logger/*/bnett* >> $LOG_FILE
@@ -64,13 +64,13 @@ echo "==========================================================================
 # Function to add skew value
 skew_change() {
 
-echo "***backing up runcommonenv  ***" | tee -a $LOG_FILE
+echo "Backing up runcommonenv" | tee -a $LOG_FILE
 cp /opt/bnet/bin/runcommonenv /archive/home/sysadmin/runcommonenv-backup
 chmod a=r /archive/home/sysadmin/runcommonenv-backup
 echo "=======================================================================================" >> $LOG_FILE
 
 
-echo "***adding sleep timer value to file runcommonenv  ***" | tee -a $LOG_FILE
+echo "Adding sleep timer value to file runcommonenv" | tee -a $LOG_FILE
 
 cd /opt/bnet/bin/
 
@@ -78,46 +78,49 @@ sed -i '/^ulimit -n 256000 /a export TGW_SIGNAL_SLEEP_TIMER_VALUE=770' runcommon
 
 
 echo "=======================================================================================" >> $LOG_FILE
-echo "***Printout /opt/bnet/bin/runcommonenv ***" >> $LOG_FILE
+echo "Printout /opt/bnet/bin/runcommonenv" >> $LOG_FILE
 cat /opt/bnet/bin/runcommonenv >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 echo "=======================================================================================" >> $LOG_FILE
 
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
-echo "***BNETSCS-SERVICE***" >> $LOG_FILE
+echo "*BNETSCS-SERVICE*" >> $LOG_FILE
 systemctl status bnetscs  | grep "Active\b" >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
-echo "***BNETTGW-SERVICE***" >> $LOG_FILE
+echo "*BNETTGW-SERVICE*" >> $LOG_FILE
 systemctl status bnettgw  | grep "Active\b" >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 
 
-echo "***stopping processes bnetscs bnettgw   ***" | tee -a $LOG_FILE
+echo "stopping processes bnetscs and bnettgw, please wait" | tee -a $LOG_FILE
 systemctl stop bnetscs
 systemctl stop bnettgw
 
 sleep 30
 
-echo "***starting processes bnetscs bnettgw   ***" | tee -a $LOG_FILE
+clear
+echo "starting processes bnetscs and bnettgw, please wait" | tee -a $LOG_FILE
 systemctl start bnetscs
 systemctl start bnettgw
 
-sleep 15
+sleep 35
+clear
+echo "processes bnetscs and bnettgw started" | tee -a $LOG_FILE
 
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
-echo "***BNETSCS-SERVICE***" >> $LOG_FILE
+echo "**BNETSCS-SERVICE**" >> $LOG_FILE
 systemctl status bnetscs  | grep "Active\b" >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
-echo "***BNETTGW-SERVICE***" >> $LOG_FILE
+echo "**BNETTGW-SERVICE**" >> $LOG_FILE
 systemctl status bnettgw  | grep "Active\b" >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 
 
 
 echo "=======================================================================================" >> $LOG_FILE
-echo "***SLEEP_TIMER_VALUE CHECK ***" >> $LOG_FILE
+echo "*SLEEP_TIMER_VALUE CHECK*" >> $LOG_FILE
 cat /opt/bnet/bin/runcommonenv | grep SLEEP_TIMER_VALUE >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 grep SLEEP /archive/logger/*/bnett* >> $LOG_FILE
@@ -135,12 +138,12 @@ if grep -Fxq "$SEARCH_LINE" "$FILE"; then
     
    get_server_info    
 
-   echo "Skew already set no action taken" | tee -a $LOG_FILE
+   echo "Skew parameter already set no action taken" | tee -a $LOG_FILE
 
 else  
     
    get_server_info
-   echo "Skew value not set, action will now be taken" | tee -a $LOG_FILE
+   echo "Skew pareameter value not set, action will now be taken" | tee -a $LOG_FILE
    skew_change
 
    echo "Skew value is now set" | tee -a $LOG_FILE
