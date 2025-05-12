@@ -60,13 +60,18 @@ echo "***OS-RELEASE***" >> $LOG_FILE
 cat /etc/redhat-release >> $LOG_FILE
 echo "=======================================================================================" >> $LOG_FILE
 
+echo "=======================================================================================" | tee -a $LOG_FILE
+# Check current thresholds
+echo "CURRENT THRESHOLDS" | tee -a $LOG_FILE
+cat /etc/cron.hourly/clean_ES_data.sh | grep lower_threshold= | tee -a $LOG_FILE
+cat /etc/cron.hourly/clean_ES_data.sh | grep upper_threshold= | tee -a $LOG_FILE
+echo "=======================================================================================" >> $LOG_FILE
+
+
 }
 
 
-
-
 update_threshold() {
-
 
 echo "=======================================================================================" | tee -a $LOG_FILE
 # Check current thresholds
@@ -76,10 +81,12 @@ cat /etc/cron.hourly/clean_ES_data.sh | grep upper_threshold= | tee -a $LOG_FILE
 echo "=======================================================================================" >> $LOG_FILE
 
 
+echo "Backing up clean ES data script" | tee -a $LOG_FILE
 
 cp $TARGET_FILE /tmp/clean_ES_data.sh-$(date +"%Y_%m_%d_%I_%M_%p")
 
 
+echo "Changing threshold" | tee -a $LOG_FILE
 # Use sed to replace the line
 sed -i 's/lower_threshold=80/lower_threshold=75/g' $TARGET_FILE
 sed -i 's/upper_threshold=90/upper_threshold=80/g' $TARGET_FILE
@@ -93,7 +100,7 @@ cat /etc/cron.hourly/clean_ES_data.sh | grep upper_threshold= | tee -a $LOG_FILE
 echo "=======================================================================================" | tee -a $LOG_FILE
 
 
-echo "Optimization in progress" | tee -a $LOG_FILE
+echo "Optimization in progress, please wait" | tee -a $LOG_FILE
 
 /etc/cron.hourly/clean_ES_data.sh
 
