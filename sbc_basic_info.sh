@@ -445,6 +445,8 @@ echo "==========================================================================
 echo "***TIME-SYNC***" >> $LOG_FILE
 cat /etc/chrony.conf >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+timedatectl status >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 
 echo "***TIME-SOURCES-TRACKING***" >> $LOG_FILE
 chronyc sources >> $LOG_FILE
