@@ -49,27 +49,43 @@ echo "==========================================================================
 get_snmpv3user() {
 
 clear
-echo "A display of all users will be presented please indicate which user to delete"
+echo "A display of all users will be presented "
 sleep 2
 clear
 
-echo "CHECK CURRENT SNMPv3 USERS" | tee -a $LOG_FILE
+echo "CURRENT SNMPv3 USERS" | tee -a $LOG_FILE
 echo "---------------------------------------------------------------------------------------"| tee -a $LOG_FILE
+echo "rouser\| rwuser count" | tee -a $LOG_FILE
+cat /etc/snmp/snmpd.conf | grep "rouser\| rwuser" | wc -l | tee -a $LOG_FILE
+echo "---------------------------------------------------------------------------------------"| tee -a $LOG_FILE
+echo " Specific Users: " | tee -a $LOG_FILE
 cat /etc/snmp/snmpd.conf | grep "rouser\| rwuser"| tee -a $LOG_FILE
+echo "=======================================================================================" | tee -a $LOG_FILE
+echo | tee -a "$LOG_FILE"
+echo "usmUser  count" | tee -a $LOG_FILE
+cat /var/lib/net-snmp/snmpd.conf | grep -i usmUser | wc -l | tee -a $LOG_FILE
 echo "---------------------------------------------------------------------------------------"| tee -a $LOG_FILE
-cat /var/lib/net-snmp/snmpd.conf | grep -i user | tee -a $LOG_FILE
+cat /var/lib/net-snmp/snmpd.conf | grep -i usmUser | tee -a $LOG_FILE
 echo "---------------------------------------------------------------------------------------"| tee -a $LOG_FILE
 
+}
 
+
+prompt_snmpv3user_del() {
+
+
+echo | tee -a "$LOG_FILE"
 # Prompt for which users to delete
   read -p "Please enter the user you want to delete, you can also enter all for all users [Default: $nosnmpv3users]: " user_snmpv3
 
 if [ -z "$user_snmpv3" ]; then
     user_snmpv3="$nosnmpv3users"
 fi
-
-
+echo | tee -a "$LOG_FILE"
 }
+
+
+
 
 
 # Function to confirm if the entered information is correct
@@ -174,6 +190,7 @@ attempts=3
 while [ $attempts -gt 0 ]; do
     get_server_info
     get_snmpv3user
+    prompt_snmpv3user_del
     confirm_info
 
     if [[ "$confirm" == "yes" || "$confirm" == "y" ]]; then
@@ -195,16 +212,10 @@ snmpv3user_delete
 
 echo | tee -a "$LOG_FILE"
 echo | tee -a "$LOG_FILE"
-echo "---------------------------------------------------------------------------------------" | tee -a $LOG_FILE
-echo "CURRENT SNMPv3 USERS" | tee -a $LOG_FILE
-echo "---------------------------------------------------------------------------------------"| tee -a $LOG_FILE
-cat /etc/snmp/snmpd.conf | grep "rouser\| rwuser"| tee -a $LOG_FILE
-echo "---------------------------------------------------------------------------------------"| tee -a $LOG_FILE
-cat /var/lib/net-snmp/snmpd.conf | grep -i user | tee -a $LOG_FILE
-echo "---------------------------------------------------------------------------------------"| tee -a $LOG_FILE
 
+sleep 3
 
-
+get_snmpv3user
 
 chmod 755 $LOG_FILE
 
