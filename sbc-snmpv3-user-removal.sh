@@ -8,6 +8,7 @@ FILE=/etc/snmp/snmpd.conf
 FILE2=/var/lib/net-snmp/snmpd.conf
 
 allsnmpv3users=all
+nosnmpv3users=none
 
 LOG_FILE=/tmp/SBC_SNMPV3-USER-DELETE_INFO-$HOST_NAME.log
 
@@ -49,7 +50,7 @@ get_snmpv3user() {
 
 clear
 echo "A display of all users will be presented please indicate which user to delete"
-sleep 3
+sleep 2
 clear
 
 echo "CHECK CURRENT SNMPv3 USERS" | tee -a $LOG_FILE
@@ -61,10 +62,10 @@ echo "--------------------------------------------------------------------------
 
 
 # Prompt for which users to delete
-  read -p "Please enter the user you want to delete, you can also enter all for all users [Default: $allsnmpv3users]: " user_snmpv3
+  read -p "Please enter the user you want to delete, you can also enter all for all users [Default: $nosnmpv3users]: " user_snmpv3
 
 if [ -z "$user_snmpv3" ]; then
-    user_snmpv3="$allsnmpv3users"
+    user_snmpv3="$nosnmpv3users"
 fi
 
 
@@ -80,10 +81,42 @@ confirm_info() {
  echo "You entered the following information:"
     echo "SNMPv3 user to delete: $user_snmpv3"  
  read -p "Is the information correct? (yes/no): " confirm
-
+ echo | tee -a "$LOG_FILE"
 }
 
     
+
+snmpfile_backup() {
+
+echo | tee -a "$LOG_FILE"
+echo "Backing up $FILE and $FILE2" | tee -a $LOG_FILE
+cp /var/lib/net-snmp/snmpd.conf /var/lib/net-snmp/snmpd.conf.varbackup-$(date +"%Y_%m_%d_%I_%M_%p")
+cp /etc/snmp/snmpd.conf /etc/snmp/snmpd.conf.etcbackup-$(date +"%Y_%m_%d_%I_%M_%p")
+
+sleep 2
+echo "Backing up files completed" | tee -a $LOG_FILE
+echo "======================================================================================="  | tee -a $LOG_FILE
+echo | tee -a "$LOG_FILE"
+}
+
+
+snmpservices_start() {
+echo | tee -a "$LOG_FILE"
+echo "starting process snmpd" | tee -a $LOG_FILE
+   service snmpd start
+   sleep 3
+
+}
+
+
+snmpservices_stop() {
+echo | tee -a "$LOG_FILE"
+echo "stopping process snmpd" | tee -a $LOG_FILE
+   service snmpd stop
+   sleep 1
+
+
+}
 
 
 
@@ -92,39 +125,43 @@ confirm_info() {
 # Function to delete snmpv3 user
 snmpv3user_delete() {
 
-echo "Backing up $FILE and $FILE2" | tee -a $LOG_FILE
-cp /var/lib/net-snmp/snmpd.conf /var/lib/net-snmp/snmpd.conf.varbackup-$(date +"%Y_%m_%d_%I_%M_%p")
-cp /etc/snmp/snmpd.conf /etc/snmp/snmpd.conf.etcbackup-$(date +"%Y_%m_%d_%I_%M_%p")
-
-sleep 2
-echo "Backing up files completed" | tee -a $LOG_FILE
-echo "======================================================================================="  | tee -a $LOG_FILE
-
-echo "stopping process snmpd" | tee -a $LOG_FILE
-service snmpd stop
-sleep 1
-
-echo "Deleting user" | tee -a $LOG_FILE
 
 
-if [ "$user_snmpv3" = "all" ]; then
+ if [[ "$user_snmpv3" = "all" || "$user_snmpv3" = "ALL" ]]; then
+     
+    snmpservices_stop
+    snmpfile_backup
     echo "Deleting all SNMPv3 users from $FILE and $FILE2..." | tee -a $LOG_FILE
     sed -i '/^rouser /d' $FILE | tee -a $LOG_FILE
     sed -i '/^usmUser /d' $FILE2 | tee -a $LOG_FILE
     echo "All users lines deleted." | tee -a $LOG_FILE
-else
+    snmpservices_start
+
+  
+   
+
+
+ elif [ "$user_snmpv3" = "none" ]; then
+
+         echo "No users will be deleted. Exiting." | tee -a $LOG_FILE
+         exit 1
+
+ else
+    snmpservices_stop
+    snmpfile_backup
     echo "Deleting SNMPv3 user $user_snmpv3 from $FILE and $FILE2..." | tee -a $LOG_FILE
     sed -i "/^rouser $user_snmpv3/d" $FILE 
     sed -i "/\"$user_snmpv3\"/d" $FILE2
+    snmpservices_start
+
 
     echo "User $user_snmpv3 deleted." | tee -a $LOG_FILE
+    echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+
 fi
 
 
-echo "starting process snmpd" | tee -a $LOG_FILE
-service snmpd stop
-sleep 1
-
+service snmpd status | tee -a $LOG_FILE
 
 }
 
@@ -140,7 +177,7 @@ while [ $attempts -gt 0 ]; do
     confirm_info
 
     if [[ "$confirm" == "yes" || "$confirm" == "y" ]]; then
-        echo "Information confirmed, user will now be deleted."
+        echo "Information confirmed."
         break
     else
         attempts=$((attempts - 1))
@@ -156,6 +193,9 @@ done
 
 snmpv3user_delete
 
+echo | tee -a "$LOG_FILE"
+echo | tee -a "$LOG_FILE"
+echo "---------------------------------------------------------------------------------------" | tee -a $LOG_FILE
 echo "CURRENT SNMPv3 USERS" | tee -a $LOG_FILE
 echo "---------------------------------------------------------------------------------------"| tee -a $LOG_FILE
 cat /etc/snmp/snmpd.conf | grep "rouser\| rwuser"| tee -a $LOG_FILE
