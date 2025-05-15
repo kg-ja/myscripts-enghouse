@@ -1,7 +1,7 @@
 #!/bin/bash
 
-CURRENT_TIMESTAMP=`date`
-HOST_NAME=`hostname`
+CURRENT_TIMESTAMP=$(date)
+HOST_NAME=$(hostname)
 theSerial=$(dmidecode -t system | grep Serial | awk '{print $3}')
 
 FILE=/etc/snmp/snmpd.conf
@@ -221,4 +221,4 @@ chmod 755 $LOG_FILE
 
 mv $LOG_FILE /tmp/SBC_SNMPV3-USER-DELETE_INFO-$HOST_NAME-$theSerial-$(date +"%Y_%m_%d_%I_%M_%p").log
 
-exit 0
+exit 0;
