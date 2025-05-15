@@ -197,8 +197,8 @@ echo "---------------------------------------------" | tee -a $LOG_FILE
     echo "SNMPv3 encryption algorithm: $user_encrypto" | tee -a $LOG_FILE
 
 get_snmpv3user
-
-
+echo "---------------------------------------------" | tee -a $LOG_FILE
+service snmpd status | tee -a $LOG_FILE
 
 echo "---------------------------------------------" | tee -a $LOG_FILE
 cd /etc/snmp/
