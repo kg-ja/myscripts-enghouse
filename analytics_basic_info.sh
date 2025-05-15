@@ -3,9 +3,12 @@
 CURRENT_TIMESTAMP=`date`
 HOST_NAME=`hostname`
 theIPaddress=$(ip addr show eth0 | grep "inet\b" | awk '{print $2}' | cut -d/ -f1)
+YEAR=$(date +"%Y")
+PREV_YEAR=$(date +"%Y" -d "last year")
 
 LOG_FILE=/tmp/ANALYTICS_LOG_INFO-$HOST_NAME.log
 
+clear
 
 echo "***$CURRENT_TIMESTAMP - START OF LOG***" > $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
@@ -99,8 +102,11 @@ cat /etc/cron.hourly/clean_ES_data.sh | grep lower_threshold= >> $LOG_FILE
 cat /etc/cron.hourly/clean_ES_data.sh | grep upper_threshold= >> $LOG_FILE
 echo "=======================================================================================" >> $LOG_FILE
 
+
 echo "***TOTAL-SHARDS***" >> $LOG_FILE
+echo >> $LOG_FILE
 curl -XGET $theIPaddress:9200/_cluster/stats?filter_path=indices.shards.total  >> $LOG_FILE
+echo >> $LOG_FILE
 echo "=======================================================================================" >> $LOG_FILE
 
 
@@ -218,11 +224,11 @@ echo "***DATA-READER_LOG-INFO***" >> $LOG_FILE
 tail -50 /var/log/analytic/datareader.log  >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 echo "***MAX-SHARDS-INFO-DATA-READER-LOG***" >> $LOG_FILE
-cat /var/log/analytic/datareader.log | grep "maximum shards open"  >> $LOG_FILE
+cat /var/log/analytic/datareader.log | grep "maximum shards open" | sort | tail -15   >> $LOG_FILE
 echo "=======================================================================================" >> $LOG_FILE
 
 echo "***PARSE-ERRORS-INFO-DATA-READER-LOG***" >> $LOG_FILE
-cat /var/log/analytic/datareader.log | grep "failed to parse"  >> $LOG_FILE
+cat /var/log/analytic/datareader.log | grep "failed to parse"  | sort | tail -15  >> $LOG_FILE
 echo "=======================================================================================" >> $LOG_FILE
 
 
@@ -249,20 +255,49 @@ echo "***TOTAL-PERFORMANCES-INDICES***" >> $LOG_FILE
 curl -XGET $theIPaddress:9200/_cat/shards?h=index,shard,prirep,state | grep "dialogic-performance" | wc -l >> $LOG_FILE
 echo "=======================================================================================" >> $LOG_FILE
 
-echo "***stats-dialogic-performance-indices***" >> $LOG_FILE
+
+
+
+
+
+echo "TOTAL stats-dialogic-performance-indices" >> $LOG_FILE
 curl -XGET $theIPaddress:9200/_cat/shards?h=index,shard,prirep,state | grep "stats-dialogic-performance" | wc -l >> $LOG_FILE
 echo "=======================================================================================" >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+echo "=======stats-dialogic-performance count for current year===============================" >> $LOG_FILE
+curl -XGET $theIPaddress:9200/_cat/indices/stats-dialogic-performance-$YEAR* | wc -l  >> $LOG_FILE
+
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+echo "=======stats-dialogic-performance count from previous year==============================" >> $LOG_FILE
+curl -XGET $theIPaddress:9200/_cat/indices/stats-dialogic-performance-$PREV_YEAR* | wc -l  >> $LOG_FILE
+
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 
 
-echo "***dialogic-performance-indices***" >> $LOG_FILE
+echo "TOTAL dialogic-performance-indices" >> $LOG_FILE
 curl -XGET $theIPaddress:9200/_cat/shards?h=index,shard,prirep,state | grep "^dialogic-performance" | wc -l >> $LOG_FILE
 echo "=======================================================================================" >> $LOG_FILE
+echo "=======dialogic-performance count for current year===============================" >> $LOG_FILE
+curl -XGET $theIPaddress:9200/_cat/indices/dialogic-performance-$YEAR* | wc -l  >> $LOG_FILE
+
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+echo "=======dialogic-performance count from previous year==============================" >> $LOG_FILE
+curl -XGET $theIPaddress:9200/_cat/indices/dialogic-performance-$PREV_YEAR* | wc -l  >> $LOG_FILE
+
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 
 
-
-echo "***dialogic-sbc-indices***" >> $LOG_FILE
+echo "*TOTAL dialogic-sbc-indices*" >> $LOG_FILE
 curl -XGET $theIPaddress:9200/_cat/shards?h=index,shard,prirep,state | grep "dialogic-sbc" | wc -l >> $LOG_FILE
 echo "=======================================================================================" >> $LOG_FILE
+echo "=======dialogic-sbc-indices count for current year===============================" >> $LOG_FILE
+curl -XGET $theIPaddress:9200/_cat/indices/dialogic-sbc-$YEAR* | wc -l  >> $LOG_FILE
+
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+echo "=======dialogic-sbc-indices count from previous year==============================" >> $LOG_FILE
+curl -XGET $theIPaddress:9200/_cat/indices/dialogic-sbc-$PREV_YEAR* | wc -l  >> $LOG_FILE
+
+
 
 
 echo "=======================================================================================" >> $LOG_FILE
@@ -281,12 +316,14 @@ curl -XGET $theIPaddress:9200/_cat/indices/dialogic-performance* | sort | tail -
 
 
 
+
 echo "=======================================================================================" >> $LOG_FILE
 echo "===============================stats-dialogic-performance==========================================" >> $LOG_FILE
 echo "=======================================================================================" >> $LOG_FILE
 curl -XGET $theIPaddress:9200/_cat/indices/stats-dialogic-performance* | sort | head -20  >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 curl -XGET $theIPaddress:9200/_cat/indices/stats-dialogic-performance* | sort | tail -10 >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 
 
 
@@ -309,6 +346,7 @@ yum list installed | wc -l >> $LOG_FILE
 echo "***all installed packages names***" >> $LOG_FILE
 yum list installed >> $LOG_FILE
 
+clear
 
 chmod 755 $LOG_FILE
 
