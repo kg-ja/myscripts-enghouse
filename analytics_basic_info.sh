@@ -214,11 +214,16 @@ echo "==========================================================================
 echo "***TIME-SYNC***" >> $LOG_FILE
 cat /etc/chrony.conf >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+timedatectl status >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+
+echo "***TIME-SOURCES-TRACKING***" >> $LOG_FILE
 chronyc sources >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 chronyc tracking >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+chronyc ntpdata >> $LOG_FILE
 echo "=======================================================================================" >> $LOG_FILE
-
 
 echo "***DATA-READER_LOG-INFO***" >> $LOG_FILE
 tail -50 /var/log/analytic/datareader.log  >> $LOG_FILE
