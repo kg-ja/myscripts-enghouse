@@ -1,13 +1,16 @@
 #!/bin/bash
 
-CURRENT_TIMESTAMP=`date`
-HOST_NAME=`hostname`
+CURRENT_TIMESTAMP=$(date)
+HOST_NAME=$(hostname)
 theSerial=$(dmidecode -t system | grep Serial | awk '{print $3}')
 
 LOG_FILE=/tmp/SBC_LOG_INFO-$HOST_NAME.log
 
-
+clear
 echo "***$CURRENT_TIMESTAMP - START OF LOG***" > $LOG_FILE
+
+echo | tee -a "$LOG_FILE"
+echo "Script running, please wait" 
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 echo "Hostname of this server is $HOST_NAME" >> $LOG_FILE
 echo "=======================================================================================" >> $LOG_FILE
@@ -671,14 +674,23 @@ cat /etc/snmp/snmpd.conf | grep com2sec >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 cat /etc/snmp/snmpd.conf | grep group >> $LOG_FILE
 echo "=======================================================================================" >> $LOG_FILE
-echo "CURRENT SNMPv3 USERS" | tee -a $LOG_FILE
-echo "---------------------------------------------------------------------------------------"| tee -a $LOG_FILE
-cat /etc/snmp/snmpd.conf | grep "rouser\| rwuser"| tee -a $LOG_FILE
-echo "---------------------------------------------------------------------------------------"| tee -a $LOG_FILE
-cat /var/lib/net-snmp/snmpd.conf | grep -i user | tee -a $LOG_FILE
-echo "---------------------------------------------------------------------------------------"| tee -a $LOG_FILE
-echo "=======================================================================================" >> $LOG_FILE
 
+echo "CURRENT SNMPv3 USERS" >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------">> $LOG_FILE
+echo "rouser\| rwuser count" >> $LOG_FILE
+cat /etc/snmp/snmpd.conf | grep "rouser\| rwuser" | wc -l >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------">> $LOG_FILE
+echo " Specific Users: " >> $LOG_FILE
+cat /etc/snmp/snmpd.conf | grep "rouser\| rwuser" >> $LOG_FILE
+echo "=======================================================================================" >> $LOG_FILE
+echo | tee -a "$LOG_FILE"
+echo "usmUser  count" >> $LOG_FILE
+cat /var/lib/net-snmp/snmpd.conf | grep -i usmUser | wc -l >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------">> $LOG_FILE
+cat /var/lib/net-snmp/snmpd.conf | grep -i usmUser | tee -a $LOG_FILE
+echo "---------------------------------------------------------------------------------------">> $LOG_FILE
+
+echo "=======================================================================================" >> $LOG_FILE
 echo "***SNMP-SERVICES-INFO***" >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 echo "***SNMP-SERVICE***" >> $LOG_FILE
@@ -721,13 +733,14 @@ echo "--------------------------------------------------------------------------
 echo "=======================================================================================" >> $LOG_FILE
 
 
-
+clear
+echo | tee -a "$LOG_FILE"
+ 
 
 chmod 755 $LOG_FILE
 
 mv $LOG_FILE /tmp/SBC_LOG_INFO-$HOST_NAME-$theSerial-$(date +"%Y_%m_%d_%I_%M_%p").log
 
+echo "This script has completed, please check /tmp folder for log to send to support" 
+
 exit 0;
-
-
-
