@@ -128,7 +128,7 @@ curl -s -XGET $theIPaddress:9200/_cat/indices/stats-dialogic-performance-$PREV_Y
 echo "---------------------------------------------------------------------------------------" | tee -a $LOG_FILE
 
 echo | tee -a "$LOG_FILE"
-echo "TOTAL dialogic-performance-indices" >> $LOG_FILE
+echo "TOTAL dialogic-performance-indices" | tee -a $LOG_FILE
 curl -s -XGET $theIPaddress:9200/_cat/shards?h=index,shard,prirep,state | grep "^dialogic-performance" | wc -l | tee -a $LOG_FILE
 echo "=======================================================================================" | tee -a $LOG_FILE
 echo "=======dialogic-performance count for current year===============================" | tee -a $LOG_FILE
@@ -243,11 +243,13 @@ confirm_info() {
 user_delete_info() {
 # Query the user on what to delete
   echo | tee -a "$LOG_FILE"
-  read -p "Enter the amount of stats-performance indices you want to delete [Default: $NumtoDelete]: " indices_delete
+  index_count=$(curl -s -XGET $theIPaddress:9200/_cat/indices/stats-dialogic-performance-* | wc -l )
+  indices_half=$(( index_count / 2 ))
+  read -p "Enter the amount of stats-performance indices you want to delete( TOTAL COUNT: $index_count) [Default: $indices_half]: " indices_delete
 
 
 if [ -z "$indices_delete" ]; then
-    indices_delete="$NumtoDelete"
+    indices_delete="$indices_half"
 fi
 
 echo | tee -a "$LOG_FILE"
@@ -267,7 +269,8 @@ get_server_info
   get_indices_info
 
 # Query the user on what to delete
-  read -p "Do you wish to delete all stats-performance indices from last year [Default: $default_prev_year]: " indices_prev_year
+  index_count_prev_year=$(curl -s -XGET $theIPaddress:9200/_cat/indices/stats-dialogic-performance-$PREV_YEAR* | wc -l )
+  read -p "Do you wish to delete all stats-performance indices from last year(amount: $index_count_prev_year ) [Default: $default_prev_year]: " indices_prev_year
 
 
 if [ -z "$indices_prev_year" ]; then
