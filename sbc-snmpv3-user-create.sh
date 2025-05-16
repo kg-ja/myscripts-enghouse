@@ -9,7 +9,8 @@ snmp_varlib_config=/var/lib/net-snmp/snmpd.conf
 default_hashAlgo=MD5
 default_encrypto=DES
 
-CURRENT_TIMESTAMP=`date`
+CURRENT_TIMESTAMP=$(date)
+HOST_NAME=$(hostname)
 
 theSerial=$(dmidecode -t system | grep Serial | awk '{print $3}')
 
@@ -53,9 +54,17 @@ sleep 1
 
 echo "CURRENT SNMPv3 USERS" | tee -a $LOG_FILE
 echo "---------------------------------------------------------------------------------------"| tee -a $LOG_FILE
-cat /etc/snmp/snmpd.conf | grep "rouser\| rwuser"| tee -a $LOG_FILE
+echo "rouser\| rwuser count" | tee -a $LOG_FILE
+cat /etc/snmp/snmpd.conf | grep "rouser\| rwuser" | wc -l | tee -a $LOG_FILE
 echo "---------------------------------------------------------------------------------------"| tee -a $LOG_FILE
-cat /var/lib/net-snmp/snmpd.conf | grep -i user | tee -a $LOG_FILE
+echo " Specific Users: " | tee -a $LOG_FILE
+cat /etc/snmp/snmpd.conf | grep "rouser\| rwuser"| tee -a $LOG_FILE
+echo "=======================================================================================" | tee -a $LOG_FILE
+echo | tee -a "$LOG_FILE"
+echo "usmUser  count" | tee -a $LOG_FILE
+cat /var/lib/net-snmp/snmpd.conf | grep -i usmUser | wc -l | tee -a $LOG_FILE
+echo "---------------------------------------------------------------------------------------"| tee -a $LOG_FILE
+cat /var/lib/net-snmp/snmpd.conf | grep -i usmUser | tee -a $LOG_FILE
 echo "---------------------------------------------------------------------------------------"| tee -a $LOG_FILE
 
 }
@@ -65,62 +74,144 @@ echo "--------------------------------------------------------------------------
 create_snmpv3user() {
 
 sleep 1
+echo | tee -a "$LOG_FILE"
 echo "You will now be prompted to enter details to create new SNMPv3 user"
     
  # Prompt the user for a SNMPv3 user
   read -p "Enter username for SNMPv3 user : " user_snmpv3
 
 
- # specifies the authentication password
-  read -p "Please enter password for SNMPv3 user : " userpw_snmpv3
+aattempt=3
 
+while [ $aattempt -gt 0 ]; do
+
+ # specifies the authentication password
+  echo "Note: passwords are hidden during input" | tee -a $LOG_FILE
+  read -s -p "Please enter password (minimum 8 characters) for SNMPv3 user : " userpw_snmpv3
+    
+	#check length of variable greater than or equal to 8
+    if [ ${#userpw_snmpv3} -ge 8 ]; then
+    echo | tee -a "$LOG_FILE"
+    echo "Password accepted." | tee -a $LOG_FILE
+    break
+
+    else
+         aattempt=$((aattempt - 1))
+         if [ $aattempt -gt 0 ]; then
+            echo | tee -a "$LOG_FILE"
+            echo "Password too short. Minimum characters is 8 enter the information again. You have $aattempt attempt(s) left." | tee -a $LOG_FILE
+        else
+            echo | tee -a "$LOG_FILE"
+            echo "You have exceeded the number of attempts. Exiting." | tee -a $LOG_FILE
+            exit 1
+         fi
+   fi
+
+done
+
+echo | tee -a "$LOG_FILE"
+
+attemptss=3
+
+while [ $attemptss -gt 0 ]; do
 
  # the password hashing algorithm
   read -p "Please enter hashing algorithm in CAPS for SNMPv3 user MD5 or SHA [Default: $default_hashAlgo]: " user_hashAlgo
 
-# Use the default hashing algorithm  if the user didn't provide input
-
-if [ -z "$user_hashAlgo" ]; then
+  if [ -z "$user_hashAlgo" ]; then
     user_hashAlgo="$default_hashAlgo"
-fi
+    echo "hashing algorithm is $user_hashAlgo." | tee -a $LOG_FILE
+    break
+  fi
 
-if [[ "$user_hashAlgo" == "MD5" || "$user_hashAlgo" == "SHA" ]]; then
-echo "valid input: $user_hashAlgo " >> $LOG_FILE
+    
+    if [[ "$user_hashAlgo" == "MD5" || "$user_hashAlgo" == "SHA" ]]; then
+       echo "valid input: $user_hashAlgo " | tee -a $LOG_FILE 
+       break
 
-else
-echo "Invalid input: $user_hashAlgo , exiting" | tee -a $LOG_FILE
-exit 1
+    else
+         attemptss=$((attemptss - 1))
+         if [ $attemptss -gt 0 ]; then
+            echo | tee -a "$LOG_FILE"
+            echo "$user_hashAlgo is invalid, enter the information again. You have $attemptss attempt(s) left." | tee -a $LOG_FILE
+        else 
+            echo | tee -a "$LOG_FILE"
+            echo "You have exceeded the number of attempts. Exiting." | tee -a $LOG_FILE
+            exit 1
+         fi
+   fi
 
-fi
+done
 
 
+
+echo | tee -a "$LOG_FILE"
+
+attemptts=3
+
+while [ $attemptts -gt 0 ]; do
 
  # specifies the encryption algorithm
   read -p "Please enter encryption algorithm for SNMPv3 user DES or AES [Default: $default_encrypto]: " user_encrypto
 
-# Use the default encryption algorithm  if the user didn't provide input
-
 if [ -z "$user_encrypto" ]; then
     user_encrypto="$default_encrypto"
+    echo "encryption algorith is $user_encrypto." | tee -a $LOG_FILE
+    break
 fi
 
-if [[ "$user_encrypto" == "DES" || "$user_encrypto" == "AES" ]]; then
-echo "valid input: $user_encrypto " >> $LOG_FILE
+    
+    if [[ "$user_encrypto" == "DES" || "$user_encrypto" == "AES" ]]; then
+       echo "valid input: $user_encrypto " | tee -a $LOG_FILE 
+       break
 
-else
+    else
+         attemptts=$((attemptts - 1))
+         if [ $attemptts -gt 0 ]; then
+            echo | tee -a "$LOG_FILE"
+            echo "$user_encrypto is invalid, enter the information again. You have $attemptts attempt(s) left." | tee -a $LOG_FILE
+        else
+            echo | tee -a "$LOG_FILE"
+            echo "You have exceeded the number of attempts. Exiting." | tee -a $LOG_FILE
+            exit 1
+         fi
+   fi
 
-echo "Invalid input: $user_encrypto , exiting" | tee -a $LOG_FILE
-exit 1
-
-fi
+done
 
 
 
 
- # specifies the encryption password
-  read -p "Please enter encryption password: " user_encrypto_pwd
 
 
+
+echo | tee -a "$LOG_FILE"
+atttempts=3
+
+while [ $atttempts -gt 0 ]; do
+
+  # specifies the encryption password
+  echo "Note: passwords are hidden during input" | tee -a $LOG_FILE
+  read -s -p "Please enter encryption password: " user_encrypto_pwd
+    
+    if [ ${#user_encrypto_pwd} -ge 8 ]; then
+    echo | tee -a "$LOG_FILE"
+    echo "Password accepted." | tee -a $LOG_FILE
+    break
+
+    else
+         atttempts=$((atttempts - 1))
+         if [ $atttempts -gt 0 ]; then
+            echo | tee -a "$LOG_FILE"
+            echo "Password too short. Minimum characters is 8 enter the information again. You have $atttempts attempt(s) left.." | tee -a $LOG_FILE
+        else
+            echo | tee -a "$LOG_FILE"
+            echo "You have exceeded the number of attempts. Exiting." | tee -a $LOG_FILE
+            exit 1
+         fi
+   fi
+
+done
 
 }
 
@@ -150,14 +241,16 @@ while [ $attempts -gt 0 ]; do
     confirm_info
 
     if [[ "$confirm" == "yes" || "$confirm" == "y" ]]; then
-        echo "Information confirmed."
+        echo "Information confirmed." | tee -a "$LOG_FILE"
+        echo | tee -a "$LOG_FILE"
         break
     else
         attempts=$((attempts - 1))
         if [ $attempts -gt 0 ]; then
             echo "Please enter the information again. You have $attempts attempt(s) left."
         else
-            echo "You have exceeded the number of attempts. Exiting."
+            echo | tee -a "$LOG_FILE"
+            echo "You have exceeded the number of attempts. Exiting." | tee -a "$LOG_FILE"
             exit 1
         fi
     fi
@@ -169,9 +262,9 @@ service snmpd stop
 
 echo "making a backup of configuration files , please wait" | tee -a $LOG_FILE
 
-cp $snmp_varlib_config /var/lib/net-snmp/snmpd.conf.varbackup-$(date +"%Y_%m_%d_%I_%M_%p")
+cp "$snmp_varlib_config" /var/lib/net-snmp/snmpd.conf.varbackup-$(date +"%Y_%m_%d_%I_%M_%p")
 
-cp $snmp_etc_config /etc/snmp/snmpd.conf.etcbackup-$(date +"%Y_%m_%d_%I_%M_%p")
+cp "$snmp_etc_config" /etc/snmp/snmpd.conf.etcbackup-$(date +"%Y_%m_%d_%I_%M_%p")
 
 net-snmp-create-v3-user -ro -A $userpw_snmpv3 -a $user_hashAlgo -X $user_encrypto_pwd -x $user_encrypto $user_snmpv3
 
