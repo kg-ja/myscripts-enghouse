@@ -1,7 +1,7 @@
 #!/bin/bash
 
-CURRENT_TIMESTAMP=`date`
-HOST_NAME=`hostname`
+CURRENT_TIMESTAMP=$(date)
+HOST_NAME=$(hostname)
 theIPaddress=$(ip addr show eth0 | grep "inet\b" | awk '{print $2}' | cut -d/ -f1)
 YEAR=$(date +"%Y")
 PREV_YEAR=$(date +"%Y" -d "last year")
@@ -12,7 +12,8 @@ clear
 
 
 echo "***$CURRENT_TIMESTAMP - START OF LOG***" > $LOG_FILE
-echo "Script running, please wait" | tee -a $LOG_FILE
+echo | tee -a "$LOG_FILE"
+echo "Script running, please wait" 
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 echo "=======================================================================================" >> $LOG_FILE
 echo "***CPU-INFO***" >> $LOG_FILE
@@ -355,11 +356,12 @@ yum list installed >> $LOG_FILE
 
 clear
 
-echo "Script completed" | tee -a $LOG_FILE
 
 chmod 755 $LOG_FILE
 
 mv $LOG_FILE /tmp/ANALYTICS_LOG_INFO-$HOST_NAME-$(date +"%Y_%m_%d_%I_%M_%p").log
+
+echo "This script has completed, please check /tmp folder for ANALYTICS_LOG_INFO-* log to send to support" 
 
 exit 0;
 
