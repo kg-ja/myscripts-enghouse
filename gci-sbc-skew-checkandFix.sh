@@ -1,11 +1,12 @@
 #!/bin/bash
 
-CURRENT_TIMESTAMP=`date`
-HOST_NAME=`hostname`
+CURRENT_TIMESTAMP=$(date)
+HOST_NAME=$(hostname)
 theSerial=$(dmidecode -t system | grep Serial | awk '{print $3}')
 
 FILE=/opt/bnet/bin/runcommonenv
 SEARCH_LINE='export TGW_SIGNAL_SLEEP_TIMER_VALUE=770'
+SEARCH_LINE2='export TGW_SIGNAL_SLEEP_TIMER_VALUE=990'
 
 LOG_FILE=/tmp/GCI-SBC_SKEW-CHECK-FIX_INFO-$HOST_NAME.log
 
@@ -59,10 +60,47 @@ echo "==========================================================================
 }
 
 
+# Function to find os type
+os_find() {
+
+# Extract the OS name from /etc/os-release
+if [ -f /etc/os-release ]; then
+    os_name=$(grep ^NAME= /etc/os-release | cut -d= -f2 | tr -d '"')
+else
+    echo "OS information not found."
+    exit 1
+fi
+
+# Determine OS type
+if [[ "$os_name" == *"Rocky Linux"* ]]; then
+    OS_TYPE="rocky"
+    echo "This is Rocky OS." | tee -a $LOG_FILE
+elif [[ "$os_name" == *"CentOS"* ]]; then
+    OS_TYPE="centos"
+    echo "This is CentOS." | tee -a $LOG_FILE
+else
+    OS_TYPE="unknown"
+    echo "OS is not rocky linux for CentOS." | tee -a $LOG_FILE
+	exit 1
+fi
+}
+
+
+# Function to display skew value
+skew_value() {
+echo | tee -a "$LOG_FILE"
+echo "=======================================================================================" | tee -a $LOG_FILE
+echo "*SLEEP_TIMER_VALUE CHECK*" | tee -a $LOG_FILE
+cat /opt/bnet/bin/runcommonenv | grep SLEEP_TIMER_VALUE| tee -a $LOG_FILE
+echo "---------------------------------------------------------------------------------------" | tee -a $LOG_FILE
+echo | tee -a "$LOG_FILE"
+}
+
 
 
 # Function to add skew value
 skew_change() {
+echo | tee -a "$LOG_FILE"
 
 echo "Backing up runcommonenv" | tee -a $LOG_FILE
 cp /opt/bnet/bin/runcommonenv /archive/home/sysadmin/runcommonenv-backup
@@ -74,7 +112,14 @@ echo "Adding sleep timer value to file runcommonenv" | tee -a $LOG_FILE
 
 cd /opt/bnet/bin/
 
-sed -i '/^ulimit -n 256000 /a export TGW_SIGNAL_SLEEP_TIMER_VALUE=770' runcommonenv
+if [[ "$OS_TYPE" == "centos" ]]; then
+   sed -i '/^ulimit -n 256000 /a export TGW_SIGNAL_SLEEP_TIMER_VALUE=770' runcommonenv
+    echo "Skew value is now set" | tee -a $LOG_FILE
+    
+elif [[ "$OS_TYPE" == "rocky" ]]; then
+     sed -i '/^ulimit -n 256000 /a export TGW_SIGNAL_SLEEP_TIMER_VALUE=990' runcommonenv
+	  echo "Skew value is now set" | tee -a $LOG_FILE
+fi
 
 
 echo "=======================================================================================" >> $LOG_FILE
@@ -131,31 +176,37 @@ echo "==========================================================================
 
 
 
+# Function to check skew value then call skew change to add if needed
+skew_check() {
+if [[ "$OS_TYPE" == "centos" ]] && grep -Fxq "$SEARCH_LINE" "$FILE"; then
+    echo "Skew parameter already set no action taken(CentOS)" | tee -a $LOG_FILE
+	skew_value
 
-# Main loop, will check if skew is set and correct if not
-
-if grep -Fxq "$SEARCH_LINE" "$FILE"; then
-    
-   get_server_info    
-
-   echo "Skew parameter already set no action taken" | tee -a $LOG_FILE
-
-else  
-    
-   get_server_info
-   echo "Skew parameter value not set, action will now be taken to add it" | tee -a $LOG_FILE
-   skew_change
-
-   echo "Skew value is now set" | tee -a $LOG_FILE
+elif [[ "$OS_TYPE" == "rocky" ]] && grep -Fxq "$SEARCH_LINE2" "$FILE"; then
+    echo "Skew parameter already set no action taken(Rocky Linux)" | tee -a $LOG_FILE
+	skew_value
+	
+else
+    echo "Skew parameter value not set, action will now be taken to add it" | tee -a $LOG_FILE
+     skew_change
+	 echo "Skew value is now set" | tee -a $LOG_FILE
+	 skew_value
 fi
+}
 
 
 
 
+# Main loop, will check if skew is set and add if not
 
 
+   get_server_info    
+   os_find
+   skew_check
+
+ 
 chmod 755 $LOG_FILE
 
 mv $LOG_FILE /tmp/GCI-SBC_SKEW-CHECK-FIX_INFO-$HOST_NAME-$theSerial-$(date +"%Y_%m_%d_%I_%M_%p").log
 
-exit 0
+exit 0;
