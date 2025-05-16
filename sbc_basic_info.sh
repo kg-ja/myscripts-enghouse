@@ -741,6 +741,6 @@ chmod 755 $LOG_FILE
 
 mv $LOG_FILE /tmp/SBC_LOG_INFO-$HOST_NAME-$theSerial-$(date +"%Y_%m_%d_%I_%M_%p").log
 
-echo "This script has completed, please check /tmp folder for log to send to support" 
+echo "This script has completed, please check /tmp folder for SBC_LOG_INFO-* log to send to support" 
 
 exit 0;
