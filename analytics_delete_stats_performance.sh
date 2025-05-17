@@ -109,7 +109,7 @@ echo >> $LOG_FILE
 echo "=======================================================================================" >> $LOG_FILE
 
 echo | tee -a "$LOG_FILE"
-echo "***TOTAL-PERFORMANCES-INDICES***" >> $LOG_FILE
+echo "***TOTAL-PERFORMANCES-INDICES***" | tee -a $LOG_FILE
 curl -s -XGET $theIPaddress:9200/_cat/shards?h=index,shard,prirep,state | grep "dialogic-performance" | wc -l | tee -a $LOG_FILE
 echo "=======================================================================================" | tee -a $LOG_FILE
 
@@ -180,7 +180,7 @@ curl -s $theIPaddress:9200/_cat/indices/stats-dialogic-performance-*?h=index \
     curl -XDELETE $theIPaddress:9200/$index
 done
 
-sleep 3
+sleep 2
 clear
 echo | tee -a "$LOG_FILE"
 echo "Indices deleted" | tee -a $LOG_FILE
@@ -204,7 +204,7 @@ curl -s $theIPaddress:9200/_cat/indices/stats-dialogic-performance-PREV_YEAR*?h=
     echo "Deleting index: $index" | tee -a $LOG_FILE
     curl -XDELETE $theIPaddress:9200/$index
 done
-sleep 3
+sleep 2
 clear
 echo | tee -a "$LOG_FILE"
 echo "Indices from last year deleted" | tee -a $LOG_FILE
@@ -234,23 +234,49 @@ confirm_info() {
     clear
     echo "You entered the following information:"
     echo "The amount of stats-performance dialogic indices to delete: $indices_delete"   
-    read -p "Is the information correct? (yes/no): " confirm
+    read -rp "Is the information correct? (yes/no): " confirm
 }
 
 
 
 
 user_delete_info() {
+
+
+atttempts=3
+
+while [ $attempts -gt 0 ]; do
+
 # Query the user on what to delete
   echo | tee -a "$LOG_FILE"
   index_count=$(curl -s -XGET $theIPaddress:9200/_cat/indices/stats-dialogic-performance-* | wc -l )
   indices_half=$(( index_count / 2 ))
-  read -p "Enter the amount of stats-performance indices you want to delete( TOTAL COUNT: $index_count) [Default: $indices_half]: " indices_delete
+  read -rp "Enter the amount of stats-performance indices you want to delete( TOTAL COUNT: $index_count) [Default: $indices_half]: " indices_delete
 
 
 if [ -z "$indices_delete" ]; then
     indices_delete="$indices_half"
 fi
+
+# Test whether reply is a (possibly‑signed) whole number and less than index_count
+    if [[ $indices_delete =~ ^[0-9]+$ && "$indices_delete" -le "$index_count"  ]]; then
+        echo "valid input" >> $LOG_FILE
+		break
+    else
+	     atttempts=$((atttempts - 1))
+		 if [ $attempts -gt 0 ]; then
+            echo | tee -a "$LOG_FILE"
+            echo "Inavlid input. Number need to be a whole number and less than or equal to $index_count. You have $atttempts attempt(s) left." | tee -a $LOG_FILE
+        else
+            echo | tee -a "$LOG_FILE"
+            echo "You have exceeded the number of attempts. Exiting." | tee -a $LOG_FILE
+            exit 1
+         fi
+
+    fi
+
+
+done
 
 echo | tee -a "$LOG_FILE"
 
@@ -261,7 +287,7 @@ echo | tee -a "$LOG_FILE"
 # Main loop, will ask for information twice if needed
 clear
 echo "This script will help with deleting old statistic indices from your data node" | tee -a $LOG_FILE
-sleep 2
+sleep 1
 get_server_info
 
 # Display total performace indices
@@ -270,12 +296,14 @@ get_server_info
 
 # Query the user on what to delete
   index_count_prev_year=$(curl -s -XGET $theIPaddress:9200/_cat/indices/stats-dialogic-performance-$PREV_YEAR* | wc -l )
-  read -p "Do you wish to delete all stats-performance indices from last year(amount: $index_count_prev_year ) [Default: $default_prev_year]: " indices_prev_year
+  read -rp "Do you wish to delete all stats-performance indices from last year(amount: $index_count_prev_year ) [Default: $default_prev_year]: " indices_prev_year
 
 
 if [ -z "$indices_prev_year" ]; then
     indices_prev_year="$default_prev_year"
 fi
+
+
 
 if [[ "$indices_prev_year" == "yes" || "$indices_prev_year" == "YES" || "$indices_prev_year" == "y"  ]]; then
 echo "valid input: $indices_prev_year " >> $LOG_FILE
