@@ -70,7 +70,7 @@ echo "--------------------------------------------------------------------------
 
 }
 
-
+# function to prompt user for snmpv3 user to delete and checks if it exists
 prompt_snmpv3user_del() {
 
 
@@ -80,10 +80,48 @@ echo | tee -a "$LOG_FILE"
 
 if [ -z "$user_snmpv3" ]; then
     user_snmpv3="$nosnmpv3users"
+	return 0
 fi
+
+if [ "$user_snmpv3" = "none" ]; then
+    echo "You have chosen to not delete any users" | tee -a $LOG_FILE	
+	return 0
+fi
+
+if [[ "$user_snmpv3" = "all" || "$user_snmpv3" = "ALL" ]]; then
+echo | tee -a "$LOG_FILE"
+echo "You have chosen to delete all users"
+sleep 1
+echo | tee -a "$LOG_FILE"
+return 0
+fi
+
+if grep -E "rouser|rwuser" /etc/snmp/snmpd.conf | grep -q "$user_snmpv3" && \
+   grep -i "usmUser" /var/lib/net-snmp/snmpd.conf | grep -q "$user_snmpv3"; then  
+    echo | tee -a "$LOG_FILE"
+    echo | tee -a "$LOG_FILE"	
+    echo "$user_snmpv3 found in both files, indicates user was created correctly"
+	sleep 2
+	return 0
+
+elif grep -E "rouser|rwuser" /etc/snmp/snmpd.conf | grep -q "$user_snmpv3" || \
+   grep -i "usmUser" /var/lib/net-snmp/snmpd.conf | grep -q "$user_snmpv3"; then  
+   echo | tee -a "$LOG_FILE"
+   echo | tee -a "$LOG_FILE"   
+   echo "$user_snmpv3 is found in only one of two files , which indicates user was not created correctly" | tee -a $LOG_FILE
+   sleep 3
+	
+else
+    echo | tee -a "$LOG_FILE"
+	echo | tee -a "$LOG_FILE"
+    echo "$user_snmpv3 not found , please review current users in display, script will exit" | tee -a $LOG_FILE
+	echo | tee -a "$LOG_FILE"
+    exit 1
+fi
+
+
 echo | tee -a "$LOG_FILE"
 }
-
 
 
 
@@ -121,7 +159,8 @@ echo | tee -a "$LOG_FILE"
 echo "starting process snmpd" | tee -a $LOG_FILE
    service snmpd start
    sleep 3
-
+echo | tee -a "$LOG_FILE"
+echo | tee -a "$LOG_FILE"
 }
 
 
@@ -131,7 +170,8 @@ echo "stopping process snmpd" | tee -a $LOG_FILE
    service snmpd stop
    sleep 1
 
-
+echo | tee -a "$LOG_FILE"
+echo | tee -a "$LOG_FILE"
 }
 
 
@@ -158,9 +198,14 @@ snmpv3user_delete() {
 
 
  elif [ "$user_snmpv3" = "none" ]; then
-
+         echo | tee -a "$LOG_FILE"
+		 echo | tee -a "$LOG_FILE"
          echo "No users will be deleted. Exiting." | tee -a $LOG_FILE
+		 echo | tee -a "$LOG_FILE"
+		 echo | tee -a "$LOG_FILE"
          exit 1
+		 		 
+		 
 
  else
     snmpservices_stop
@@ -170,9 +215,10 @@ snmpv3user_delete() {
     sed -i "/\"$user_snmpv3\"/d" $FILE2
     snmpservices_start
 
-
+    echo | tee -a "$LOG_FILE"
     echo "User $user_snmpv3 deleted." | tee -a $LOG_FILE
     echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+	echo | tee -a "$LOG_FILE"
 
 fi
 
