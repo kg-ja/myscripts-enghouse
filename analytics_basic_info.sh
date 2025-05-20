@@ -1,5 +1,7 @@
 #!/bin/bash
 
+exec 2>/dev/null
+
 CURRENT_TIMESTAMP=$(date)
 HOST_NAME=$(hostname)
 theIPaddress=$(ip addr show eth0 | grep "inet\b" | awk '{print $2}' | cut -d/ -f1)
@@ -19,12 +21,21 @@ echo "==========================================================================
 echo "***CPU-INFO***" >> $LOG_FILE
 lscpu >> $LOG_FILE
 echo "=======================================================================================" >> $LOG_FILE
+
 echo "=======================================================================================" >> $LOG_FILE
 echo "***MEMORY-PRINTOUT***" >> $LOG_FILE
+echo | tee -a "$LOG_FILE"
+dmidecode -t memory | grep -i 'Size:' | grep -v 'No Module Installed' | grep -i 'MB'  | awk '{sum += $2} END {print sum, "MB"}' >> $LOG_FILE
+echo | tee -a "$LOG_FILE"
+dmidecode -t memory | grep -i 'Size:' | grep -v 'No Module Installed' | grep -i 'GB'  | awk '{sum += $2} END {print sum, "GB"}' >> $LOG_FILE
+echo | tee -a "$LOG_FILE"
+echo | tee -a "$LOG_FILE"
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 free -h >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 free -k >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+echo "=======================================================================================" >> $LOG_FILE
 echo "=======================================================================================" >> $LOG_FILE
 
 echo "IP ADDRESS OF THIS SYSTEM IS: $theIPaddress" >> $LOG_FILE
