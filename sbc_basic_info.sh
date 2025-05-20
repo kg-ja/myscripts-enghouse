@@ -1,8 +1,12 @@
 #!/bin/bash
 
+exec 2>/dev/null
+
 CURRENT_TIMESTAMP=$(date)
 HOST_NAME=$(hostname)
 theSerial=$(dmidecode -t system | grep Serial | awk '{print $3}')
+
+
 
 LOG_FILE=/tmp/SBC_LOG_INFO-$HOST_NAME.log
 
@@ -27,6 +31,13 @@ lscpu >> $LOG_FILE
 
 echo "=======================================================================================" >> $LOG_FILE
 echo "***MEMORY-PRINTOUT***" >> $LOG_FILE
+echo | tee -a "$LOG_FILE"
+dmidecode -t memory | grep -i 'Size:' | grep -v 'No Module Installed' | grep -i 'MB'  | awk '{sum += $2} END {print sum, "MB"}' >> $LOG_FILE
+echo | tee -a "$LOG_FILE"
+dmidecode -t memory | grep -i 'Size:' | grep -v 'No Module Installed' | grep -i 'GB'  | awk '{sum += $2} END {print sum, "GB"}' >> $LOG_FILE
+echo | tee -a "$LOG_FILE"
+echo | tee -a "$LOG_FILE"
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 free -h >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 free -k >> $LOG_FILE
@@ -55,7 +66,7 @@ du -h / --exclude=/proc --exclude=/sys --exclude=/dev --exclude=/run --max-depth
 echo "=======================================================================================" >> $LOG_FILE
 
 echo "***MEMORY-PRINTOUT***" >> $LOG_FILE
-free -h >> $LOG_FILE
+dmidecode -t memory | grep -i 'Size:' | grep -v 'No Module Installed' | awk '{sum += $2} END {print sum, "MB"}' >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 top -b -o %MEM | head -n 16 >> $LOG_FILE
 echo "=======================================================================================" >> $LOG_FILE
@@ -670,10 +681,23 @@ echo "==========================================================================
 
 echo "***SNMP-SETUP-SNIPPET***" >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+cat /etc/snmp/snmpd.conf | grep .1 | grep view | grep -v all | grep -v roview |grep -v rwview  >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+
 cat /etc/snmp/snmpd.conf | grep com2sec >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 cat /etc/snmp/snmpd.conf | grep group >> $LOG_FILE
 echo "=======================================================================================" >> $LOG_FILE
+
+
+
+
+
+
+
+
+
 
 echo "CURRENT SNMPv3 USERS" >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------">> $LOG_FILE
@@ -687,7 +711,7 @@ echo | tee -a "$LOG_FILE"
 echo "usmUser  count" >> $LOG_FILE
 cat /var/lib/net-snmp/snmpd.conf | grep -i usmUser | wc -l >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------">> $LOG_FILE
-cat /var/lib/net-snmp/snmpd.conf | grep -i usmUser | tee -a $LOG_FILE
+cat /var/lib/net-snmp/snmpd.conf | grep -i usmUser >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------">> $LOG_FILE
 
 echo "=======================================================================================" >> $LOG_FILE
