@@ -1,7 +1,7 @@
 #!/bin/bash
 
-CURRENT_TIMESTAMP=`date`
-HOST_NAME=`hostname`
+CURRENT_TIMESTAMP=$(date)
+HOST_NAME=$(hostname)
 EMSIP=$(cat /var/adm/ems/ems_ip)
 theSerial=$(dmidecode -t system | grep Serial | awk '{print $3}')
 EMSROLE=$(cat /var/adm/ems/server_role)
@@ -22,8 +22,17 @@ lscpu >> $LOG_FILE
 
 echo "=======================================================================================" >> $LOG_FILE
 echo "***MEMORY-PRINTOUT***" >> $LOG_FILE
+echo | tee -a "$LOG_FILE"
+dmidecode -t memory | grep -i 'Size:' | grep -v 'No Module Installed' | grep -i 'MB'  | awk '{sum += $2} END {print sum, "MB"}' >> $LOG_FILE
+echo | tee -a "$LOG_FILE"
+dmidecode -t memory | grep -i 'Size:' | grep -v 'No Module Installed' | grep -i 'GB'  | awk '{sum += $2} END {print sum, "GB"}' >> $LOG_FILE
+echo | tee -a "$LOG_FILE"
+echo | tee -a "$LOG_FILE"
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 free -h >> $LOG_FILE
-echo "=======================================================================================" >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+free -k >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 echo "=======================================================================================" >> $LOG_FILE
 
 echo "***-EMS-PLATFORM-INFORMATION***" >> $LOG_FILE
