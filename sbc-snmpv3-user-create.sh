@@ -76,6 +76,8 @@ create_snmpv3user() {
 sleep 1
 echo | tee -a "$LOG_FILE"
 echo "You will now be prompted to enter details to create new SNMPv3 user"
+echo | tee -a "$LOG_FILE"
+echo | tee -a "$LOG_FILE"
     
  # Prompt the user for a SNMPv3 user
   read -p "Enter username for SNMPv3 user : " user_snmpv3
@@ -85,6 +87,8 @@ aattempt=3
 
 while [ $aattempt -gt 0 ]; do
 
+ echo | tee -a "$LOG_FILE"
+ echo | tee -a "$LOG_FILE"
  # specifies the authentication password
   echo "Note: passwords are hidden during input" | tee -a $LOG_FILE
   read -s -p "Please enter password (minimum 8 characters) for SNMPv3 user : " userpw_snmpv3
@@ -93,6 +97,7 @@ while [ $aattempt -gt 0 ]; do
     if [ ${#userpw_snmpv3} -ge 8 ]; then
     echo | tee -a "$LOG_FILE"
     echo "Password accepted." | tee -a $LOG_FILE
+	echo | tee -a "$LOG_FILE"
     break
 
     else
@@ -100,9 +105,12 @@ while [ $aattempt -gt 0 ]; do
          if [ $aattempt -gt 0 ]; then
             echo | tee -a "$LOG_FILE"
             echo "Password too short. Minimum characters is 8 enter the information again. You have $aattempt attempt(s) left." | tee -a $LOG_FILE
+			echo | tee -a "$LOG_FILE"
+			echo | tee -a "$LOG_FILE"
         else
             echo | tee -a "$LOG_FILE"
             echo "You have exceeded the number of attempts. Exiting." | tee -a $LOG_FILE
+			echo | tee -a "$LOG_FILE"
             exit 1
          fi
    fi
@@ -115,18 +123,23 @@ attemptss=3
 
 while [ $attemptss -gt 0 ]; do
 
+ echo | tee -a "$LOG_FILE"
+ echo | tee -a "$LOG_FILE"
  # the password hashing algorithm
+  echo | tee -a "$LOG_FILE"
   read -p "Please enter hashing algorithm in CAPS for SNMPv3 user MD5 or SHA [Default: $default_hashAlgo]: " user_hashAlgo
 
   if [ -z "$user_hashAlgo" ]; then
     user_hashAlgo="$default_hashAlgo"
     echo "hashing algorithm is $user_hashAlgo." | tee -a $LOG_FILE
+	echo | tee -a "$LOG_FILE"
     break
   fi
 
     
     if [[ "$user_hashAlgo" == "MD5" || "$user_hashAlgo" == "SHA" ]]; then
        echo "valid input: $user_hashAlgo " | tee -a $LOG_FILE 
+	   echo | tee -a "$LOG_FILE"
        break
 
     else
@@ -134,9 +147,13 @@ while [ $attemptss -gt 0 ]; do
          if [ $attemptss -gt 0 ]; then
             echo | tee -a "$LOG_FILE"
             echo "$user_hashAlgo is invalid, enter the information again. You have $attemptss attempt(s) left." | tee -a $LOG_FILE
+			echo | tee -a "$LOG_FILE"
+			echo | tee -a "$LOG_FILE"
         else 
             echo | tee -a "$LOG_FILE"
             echo "You have exceeded the number of attempts. Exiting." | tee -a $LOG_FILE
+			echo | tee -a "$LOG_FILE"
+			echo | tee -a "$LOG_FILE"
             exit 1
          fi
    fi
@@ -150,19 +167,22 @@ echo | tee -a "$LOG_FILE"
 attemptts=3
 
 while [ $attemptts -gt 0 ]; do
-
+  echo | tee -a "$LOG_FILE"
+  echo | tee -a "$LOG_FILE"
  # specifies the encryption algorithm
   read -p "Please enter encryption algorithm for SNMPv3 user DES or AES [Default: $default_encrypto]: " user_encrypto
 
 if [ -z "$user_encrypto" ]; then
     user_encrypto="$default_encrypto"
     echo "encryption algorith is $user_encrypto." | tee -a $LOG_FILE
+	echo | tee -a "$LOG_FILE"
     break
 fi
 
     
     if [[ "$user_encrypto" == "DES" || "$user_encrypto" == "AES" ]]; then
        echo "valid input: $user_encrypto " | tee -a $LOG_FILE 
+	   echo | tee -a "$LOG_FILE"
        break
 
     else
@@ -170,9 +190,13 @@ fi
          if [ $attemptts -gt 0 ]; then
             echo | tee -a "$LOG_FILE"
             echo "$user_encrypto is invalid, enter the information again. You have $attemptts attempt(s) left." | tee -a $LOG_FILE
+			echo | tee -a "$LOG_FILE"
+			echo | tee -a "$LOG_FILE"
         else
             echo | tee -a "$LOG_FILE"
             echo "You have exceeded the number of attempts. Exiting." | tee -a $LOG_FILE
+			echo | tee -a "$LOG_FILE"
+			echo | tee -a "$LOG_FILE"
             exit 1
          fi
    fi
@@ -189,7 +213,8 @@ echo | tee -a "$LOG_FILE"
 atttempts=3
 
 while [ $atttempts -gt 0 ]; do
-
+  echo | tee -a "$LOG_FILE"
+  echo | tee -a "$LOG_FILE"
   # specifies the encryption password
   echo "Note: passwords are hidden during input" | tee -a $LOG_FILE
   read -s -p "Please enter encryption password: " user_encrypto_pwd
