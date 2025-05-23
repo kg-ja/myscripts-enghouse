@@ -1,5 +1,7 @@
 #!/bin/bash
 
+exec 2>/dev/null
+
 CURRENT_TIMESTAMP=$(date)
 HOST_NAME=$(hostname)
 EMSIP=$(cat /var/adm/ems/ems_ip)
@@ -8,8 +10,12 @@ EMSROLE=$(cat /var/adm/ems/server_role)
 
 LOG_FILE=/tmp/EMS_LOG_INFO-$HOST_NAME.log
 
+clear
 
 echo "***$CURRENT_TIMESTAMP - START OF LOG***" > $LOG_FILE
+echo >> $LOG_FILE
+echo "Script running, please wait" 
+
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 echo "Hostname of this server is $HOST_NAME" >> $LOG_FILE
 echo "=======================================================================================" >> $LOG_FILE
@@ -22,12 +28,12 @@ lscpu >> $LOG_FILE
 
 echo "=======================================================================================" >> $LOG_FILE
 echo "***MEMORY-PRINTOUT***" >> $LOG_FILE
-echo | tee -a "$LOG_FILE"
+echo >> $LOG_FILE
 dmidecode -t memory | grep -i 'Size:' | grep -v 'No Module Installed' | grep -i 'MB'  | awk '{sum += $2} END {print sum, "MB"}' >> $LOG_FILE
-echo | tee -a "$LOG_FILE"
+echo >> $LOG_FILE
 dmidecode -t memory | grep -i 'Size:' | grep -v 'No Module Installed' | grep -i 'GB'  | awk '{sum += $2} END {print sum, "GB"}' >> $LOG_FILE
-echo | tee -a "$LOG_FILE"
-echo | tee -a "$LOG_FILE"
+echo >> $LOG_FILE
+echo >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 free -h >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
@@ -86,7 +92,7 @@ echo "*IPADDR/NETMASK/GATEWAY-eth0 *" >> $LOG_FILE
 cat /etc/sysconfig/network-scripts/ifcfg-eth0 | grep "IPADDR" >> $LOG_FILE
 cat /etc/sysconfig/network-scripts/ifcfg-eth0 | grep "NETMASK" >> $LOG_FILE
 cat /etc/sysconfig/network-scripts/ifcfg-eth0 | grep "GATEWAY" >> $LOG_FILE
-echo "========================================================================="
+echo "=========================================================================" >> $LOG_FILE
 
 echo "*MGMT1-VM*" >> $LOG_FILE
 cat /etc/sysconfig/network-scripts/ifcfg-eth1| grep "DEVICE\|NAME" >> $LOG_FILE
@@ -179,7 +185,15 @@ echo "--------------------------------------------------------------------------
 echo "***STORAGE-INFO***" >> $LOG_FILE
 
 du -sh /var/ >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 du -sh /var/crash/ >> $LOG_FILE
+
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+
+du -h / --exclude=/proc --exclude=/sys --exclude=/dev --exclude=/run --max-depth=1 | sort -rh | head -20 >> $LOG_FILE
+
+
+echo "=======================================================================================" >> $LOG_FILE
 
 echo "=======================================================================================" >> $LOG_FILE
 
@@ -271,6 +285,10 @@ echo "==========================================================================
 echo "***TIME-SYNC***" >> $LOG_FILE
 cat /etc/chrony.conf >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+timedatectl status >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+chronyc tracking >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 
 echo "***TIME-SOURCES-TRACKING***" >> $LOG_FILE
 chronyc sources >> $LOG_FILE
@@ -310,6 +328,10 @@ echo "--------------------------------------------------------------------------
 cat /archive/log/ems/ems.log | grep -i tomcat >> $LOG_FILE
 
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+
+grep -i "skipping" /archive/log/ems/ems.log | tail -10  >> $LOG_FILE
+
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 
 grep -i "keepAlive" /archive/log/ems/ems.log | tail -10  >> $LOG_FILE
@@ -369,14 +391,40 @@ echo "==========================================================================
 
 
 
-
 echo "***SNMP-SETUP-SNIPPET***" >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+cat /etc/snmp/snmpd.conf | grep .1 | grep view | grep -v all | grep -v roview |grep -v rwview  >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+
 cat /etc/snmp/snmpd.conf | grep com2sec >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 cat /etc/snmp/snmpd.conf | grep group >> $LOG_FILE
+echo "=======================================================================================" >> $LOG_FILE
+
+
+echo "CURRENT SNMPv3 USERS" >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------">> $LOG_FILE
+echo "rouser\| rwuser count" >> $LOG_FILE
+cat /etc/snmp/snmpd.conf | grep "rouser\| rwuser" | wc -l >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------">> $LOG_FILE
+echo " Specific Users: " >> $LOG_FILE
+cat /etc/snmp/snmpd.conf | grep "rouser\| rwuser" >> $LOG_FILE
+echo "=======================================================================================" >> $LOG_FILE
+echo | tee -a "$LOG_FILE"
+echo "usmUser  count" >> $LOG_FILE
+cat /var/lib/net-snmp/snmpd.conf | grep -i usmUser | wc -l >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------">> $LOG_FILE
+cat /var/lib/net-snmp/snmpd.conf | grep -i usmUser >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------">> $LOG_FILE
+
+echo "=======================================================================================" >> $LOG_FILE
+echo "***SNMP-SERVICES-INFO***" >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
-cat /etc/snmp/snmpd.conf | grep rouser >> $LOG_FILE
+echo "***SNMP-SERVICE***" >> $LOG_FILE
+systemctl status snmpd  | grep "Active\b" >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+systemctl status snmpd >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 echo "***EMS-USERS-INFO***" >> $LOG_FILE
@@ -401,6 +449,8 @@ echo "==========================================================================
 chmod 755 $LOG_FILE
 
 mv $LOG_FILE /tmp/EMS_LOG_INFO-$HOST_NAME-$EMSROLE-$EMSIP-$theSerial-$(date +"%Y_%m_%d_%I_%M_%p").log
+
+echo "This script has completed, please check /tmp folder for EMS_LOG_INFO-* log to send to support" 
 
 exit 0;
 
