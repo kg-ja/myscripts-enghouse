@@ -116,6 +116,18 @@ cat /etc/cron.hourly/clean_ES_data.sh | grep lower_threshold= >> $LOG_FILE
 cat /etc/cron.hourly/clean_ES_data.sh | grep upper_threshold= >> $LOG_FILE
 echo "=======================================================================================" >> $LOG_FILE
 
+echo >> $LOG_FILE
+echo "=======================================================================================" | tee -a $LOG_FILE
+
+# Check current stats setup
+echo "DEFAULT CONFIG JSON"  >> $LOG_FILE
+
+cat /opt/analytic/datareader/service/config/default.json | grep "sendStatisticsToES"  >> $LOG_FILE
+
+echo "======================================================================================="  >> $LOG_FILE
+
+echo >> $LOG_FILE
+
 
 echo "***TOTAL-SHARDS***" >> $LOG_FILE
 echo >> $LOG_FILE
