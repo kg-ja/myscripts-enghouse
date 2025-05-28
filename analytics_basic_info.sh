@@ -117,7 +117,7 @@ cat /etc/cron.hourly/clean_ES_data.sh | grep upper_threshold= >> $LOG_FILE
 echo "=======================================================================================" >> $LOG_FILE
 
 echo >> $LOG_FILE
-echo "=======================================================================================" | tee -a $LOG_FILE
+echo "=======================================================================================" >> $LOG_FILE
 
 # Check current stats setup
 echo "DEFAULT CONFIG JSON"  >> $LOG_FILE
@@ -283,16 +283,12 @@ echo "--------------------------------------------------------------------------
 echo "=======================================================================================" >> $LOG_FILE
 
 echo "***TOTAL-PERFORMANCES-INDICES***" >> $LOG_FILE
-curl -s -XGET $theIPaddress:9200/_cat/shards?h=index,shard,prirep,state | grep "dialogic-performance" | wc -l >> $LOG_FILE
+curl -s -XGET $theIPaddress:9200/_cat/indices/*performance-* | wc -l >> $LOG_FILE
 echo "=======================================================================================" >> $LOG_FILE
 
 
-
-
-
-
 echo "TOTAL stats-dialogic-performance-indices" >> $LOG_FILE
-curl -s -XGET $theIPaddress:9200/_cat/shards?h=index,shard,prirep,state | grep "stats-dialogic-performance" | wc -l >> $LOG_FILE
+curl -s -XGET $theIPaddress:9200/_cat/indices/stats-dialogic-performance-* | wc -l  >> $LOG_FILE
 echo "=======================================================================================" >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 echo "=======stats-dialogic-performance count for current year===============================" >> $LOG_FILE
@@ -306,7 +302,7 @@ echo "--------------------------------------------------------------------------
 
 
 echo "TOTAL dialogic-performance-indices" >> $LOG_FILE
-curl -s -XGET $theIPaddress:9200/_cat/shards?h=index,shard,prirep,state | grep "^dialogic-performance" | wc -l >> $LOG_FILE
+curl -s -XGET $theIPaddress:9200/_cat/indices/dialogic-performance-* | wc -l >> $LOG_FILE
 echo "=======================================================================================" >> $LOG_FILE
 echo "=======dialogic-performance count for current year===============================" >> $LOG_FILE
 curl -s -XGET $theIPaddress:9200/_cat/indices/dialogic-performance-$YEAR* | wc -l  >> $LOG_FILE
@@ -319,7 +315,7 @@ echo "--------------------------------------------------------------------------
 
 
 echo "*TOTAL dialogic-sbc-indices*" >> $LOG_FILE
-curl -s -XGET $theIPaddress:9200/_cat/shards?h=index,shard,prirep,state | grep "dialogic-sbc" | wc -l >> $LOG_FILE
+curl -s -XGET $theIPaddress:9200/_cat/indices/dialogic-sbc-* | wc -l  >> $LOG_FILE
 echo "=======================================================================================" >> $LOG_FILE
 echo "=======dialogic-sbc-indices count for current year===============================" >> $LOG_FILE
 curl -s -XGET $theIPaddress:9200/_cat/indices/dialogic-sbc-$YEAR* | wc -l  >> $LOG_FILE
