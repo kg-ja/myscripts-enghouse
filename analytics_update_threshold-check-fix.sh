@@ -98,6 +98,9 @@ echo | tee -a "$LOG_FILE"
 
 get_indices_info() {
 
+echo | tee -a "$LOG_FILE"
+echo | tee -a "$LOG_FILE"
+
 echo "***TOTAL-SHARDS***" >> $LOG_FILE
 echo >> $LOG_FILE
 curl -s -XGET $theIPaddress:9200/_cluster/stats?filter_path=indices.shards.total  >> $LOG_FILE
@@ -106,12 +109,12 @@ echo "==========================================================================
 echo >> $LOG_FILE
 echo >> $LOG_FILE
 echo "***TOTAL-PERFORMANCES-INDICES***" >> $LOG_FILE
-curl -s -XGET $theIPaddress:9200/_cat/shards?h=index,shard,prirep,state | grep "dialogic-performance" | wc -l >> $LOG_FILE
+curl -s -XGET $theIPaddress:9200/_cat/indices/*performance-* | wc -l >> $LOG_FILE >> $LOG_FILE
 echo "=======================================================================================" >> $LOG_FILE
 
 
 echo "TOTAL stats-dialogic-performance-indices" >> $LOG_FILE
-curl -s -XGET $theIPaddress:9200/_cat/shards?h=index,shard,prirep,state | grep "stats-dialogic-performance" | wc -l >> $LOG_FILE
+curl -s -XGET $theIPaddress:9200/_cat/indices/stats-dialogic-performance-* | wc -l  >> $LOG_FILE
 echo "=======================================================================================" >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 echo "=======stats-dialogic-performance count for current year===============================" >> $LOG_FILE
@@ -125,7 +128,7 @@ echo "--------------------------------------------------------------------------
 
 
 echo "TOTAL dialogic-performance-indices" >> $LOG_FILE
-curl -s -XGET $theIPaddress:9200/_cat/shards?h=index,shard,prirep,state | grep "^dialogic-performance" | wc -l >> $LOG_FILE
+curl -s -XGET $theIPaddress:9200/_cat/indices/dialogic-performance-* | wc -l >> $LOG_FILE
 echo "=======================================================================================" >> $LOG_FILE
 echo "=======dialogic-performance count for current year===============================" >> $LOG_FILE
 curl -s -XGET $theIPaddress:9200/_cat/indices/dialogic-performance-$YEAR* | wc -l  >> $LOG_FILE
@@ -138,7 +141,7 @@ echo "--------------------------------------------------------------------------
 
 
 echo "*TOTAL dialogic-sbc-indices*" >> $LOG_FILE
-curl -s -XGET $theIPaddress:9200/_cat/shards?h=index,shard,prirep,state | grep "dialogic-sbc" | wc -l >> $LOG_FILE
+curl -s -XGET $theIPaddress:9200/_cat/indices/dialogic-sbc-* | wc -l  >> $LOG_FILE
 echo "=======================================================================================" >> $LOG_FILE
 echo "=======dialogic-sbc-indices count for current year===============================" >> $LOG_FILE
 curl -s -XGET $theIPaddress:9200/_cat/indices/dialogic-sbc-$YEAR* | wc -l  >> $LOG_FILE
@@ -148,11 +151,17 @@ echo "=======dialogic-sbc-indices count from previous year======================
 curl -s -XGET $theIPaddress:9200/_cat/indices/dialogic-sbc-$PREV_YEAR* | wc -l  >> $LOG_FILE
 
 
+echo | tee -a "$LOG_FILE"
+echo | tee -a "$LOG_FILE"
+
 
 }
 
 
 update_threshold() {
+
+echo | tee -a "$LOG_FILE"
+echo | tee -a "$LOG_FILE"
 
 echo "=======================================================================================" | tee -a $LOG_FILE
 # Check current thresholds
@@ -194,6 +203,9 @@ tail -10 /tmp/purge_analytic.log | tee -a $LOG_FILE
 echo "=======================================================================================" | tee -a $LOG_FILE
 
 echo "Threshold updated if default, please check status in an hour, script will continue" | tee -a $LOG_FILE
+
+echo | tee -a "$LOG_FILE"
+
 
 }
 
@@ -243,6 +255,7 @@ echo "CURRENT CONFIG JSON" | tee -a $LOG_FILE
 cat /opt/analytic/datareader/service/config/default.json | grep "sendStatisticsToES" | tee -a $LOG_FILE
 
 echo "=======================================================================================" | tee -a $LOG_FILE
+echo | tee -a "$LOG_FILE"
 
 
 }
@@ -256,6 +269,7 @@ echo "==========================================================================
   clear
   
   get_server_info
+  get_indices_info
 
 echo "=======================================================================================" | tee -a $LOG_FILE
 
