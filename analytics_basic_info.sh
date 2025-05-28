@@ -64,9 +64,35 @@ curl -s -XGET $theIPaddress:9200 >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 
 
+echo "***ANALYTICS-PLATFORM-INFORMATION***" >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+
+echo "*** HW/VM -License-Platform-Details***" >> $LOG_FILE
+
+dmidecode -t system | grep Manufacturer >> $LOG_FILE
+dmidecode -t system | grep Product >> $LOG_FILE
+dmidecode -t system | grep Serial >> $LOG_FILE
+dmidecode -t system | grep UUID >> $LOG_FILE
+echo "=======================================================================================" >> $LOG_FILE
+
+
 echo "***OS-RELEASE***" >> $LOG_FILE
 cat /etc/redhat-release >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+cat /etc/os-release >> $LOG_FILE
 echo "=======================================================================================" >> $LOG_FILE
+
+echo "***KERNEL-VERSION***" >> $LOG_FILE
+uname -r >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+echo "=======================================================================================" >> $LOG_FILE
+
+
+echo "***KEXEC-VERSION***" >> $LOG_FILE
+rpm -qa | grep kexec >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+echo "=======================================================================================" >> $LOG_FILE
+
 
 echo "***Full summary of available and used disk space usage of the file system***" >> $LOG_FILE
 echo "***USED SPACE ABOVE 80% NEEDS ATTENTION***" >> $LOG_FILE
