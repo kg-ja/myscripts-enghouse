@@ -68,8 +68,33 @@ curl -s -XGET $theIPaddress:9200 >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 
 
+echo "***ANALYTICS-PLATFORM-INFORMATION***" >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+
+echo "*** HW/VM -License-Platform-Details***" >> $LOG_FILE
+
+dmidecode -t system | grep Manufacturer >> $LOG_FILE
+dmidecode -t system | grep Product >> $LOG_FILE
+dmidecode -t system | grep Serial >> $LOG_FILE
+dmidecode -t system | grep UUID >> $LOG_FILE
+echo "=======================================================================================" >> $LOG_FILE
+
+
 echo "***OS-RELEASE***" >> $LOG_FILE
 cat /etc/redhat-release >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+cat /etc/os-release >> $LOG_FILE
+echo "=======================================================================================" >> $LOG_FILE
+
+echo "***KERNEL-VERSION***" >> $LOG_FILE
+uname -r >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+echo "=======================================================================================" >> $LOG_FILE
+
+
+echo "***KEXEC-VERSION***" >> $LOG_FILE
+rpm -qa | grep kexec >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 echo "=======================================================================================" >> $LOG_FILE
 
 echo "=======================================================================================" | tee -a $LOG_FILE
@@ -262,6 +287,58 @@ echo | tee -a "$LOG_FILE"
 
 
 
+check_kibana_failed() {
+
+echo | tee -a "$LOG_FILE"
+echo | tee -a "$LOG_FILE"
+echo "=======================================================================================" | tee -a $LOG_FILE
+
+# Check the status of kibana service
+echo "Checking Kibana service status..." | tee -a $LOG_FILE
+STATUS_OUTPUT=$(systemctl status kibana 2>&1)
+
+if echo "$STATUS_OUTPUT" | grep -q "Active: failed"; then
+    echo "Kibana service is in a failed state." | tee -a $LOG_FILE
+
+    # Find Kibana process IDs and kill them
+    echo "Searching for Kibana processes..." | tee -a $LOG_FILE
+    PIDS=$(ps -ef | grep '[k]ibana' | awk '{print $2}') 
+
+    if [[ -z "$PIDS" ]]; then
+        echo "Killing Kibana process(es): $PIDS" | tee -a $LOG_FILE        
+        kill -9 "$PID" | tee -a $LOG_FILE
+        echo "Killed process $PID" | tee -a $LOG_FILE
+        sleep 5
+    else
+        echo "No Kibana processes found." | tee -a $LOG_FILE
+    fi
+
+    # Restart Kibana service
+    echo "Restarting Kibana service..." | tee -a $LOG_FILE
+    systemctl restart kibana | tee -a $LOG_FILE
+    
+	sleep 5
+    # Confirm status
+    NEW_STATUS=$(systemctl status kibana 2>&1)
+    if echo "$NEW_STATUS" | grep -q "Active: active"; then
+        echo "Kibana service restarted successfully." | tee -a $LOG_FILE
+    else
+        echo "Failed to restart Kibana service. Status: $NEW_STATUS" | tee -a $LOG_FILE
+    fi
+else
+    echo "Kibana service is not in a failed state." | tee -a $LOG_FILE
+    echo "Current status:" | tee -a $LOG_FILE
+    systemctl status kibana | grep Active | tee -a $LOG_FILE
+fi
+
+
+echo | tee -a "$LOG_FILE"
+echo | tee -a "$LOG_FILE"
+
+}
+
+
+
 
 # Main loop, will check if  file actually exist then if at least one thresholds are default
 
@@ -340,14 +417,15 @@ fi
 get_indices_info
 
 
+check_kibana_failed
 
-
+sleep 3
 
 chmod 755 $LOG_FILE
 
 mv $LOG_FILE /tmp/CLEANDATA-THRESHOLD-UPDATE-$HOST_NAME-$(date +"%Y_%m_%d_%I_%M_%p").log
 
-sleep 5
+sleep 3
 
 clear
 
