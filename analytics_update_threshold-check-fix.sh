@@ -258,8 +258,10 @@ cp $TARGET_FILE2 /tmp/default.json-$(date +"%Y_%m_%d_%I_%M_%p")
 sed -i 's/"sendStatisticsToES": true/"sendStatisticsToES": false/g' $TARGET_FILE2
 
 # delete all stats-dialogic-performance
+echo "Deleting all stats-performace indices" >> $LOG_FILE
 curl -s -XDELETE $theIPaddress:9200/stats-dialogic-performance-*
-
+sleep 1
+echo "all stats-performace indices deleted" >> $LOG_FILE
 
 #restart datareader srvice
 echo | tee -a "$LOG_FILE"
@@ -270,11 +272,16 @@ echo | tee -a "$LOG_FILE"
 sleep 5
 
 echo | tee -a "$LOG_FILE"
+echo "=======================================================================================" >> $LOG_FILE
+echo "Checking datareader status" >> $LOG_FILE
+echo >> $LOG_FILE
 systemctl status datareader >> $LOG_FILE
+echo "=======================================================================================" >> $LOG_FILE
 
 # Check new stats setup
 echo | tee -a "$LOG_FILE"
 echo | tee -a "$LOG_FILE"
+echo "=======================================================================================" | tee -a $LOG_FILE
 echo "CURRENT CONFIG JSON" | tee -a $LOG_FILE
 
 cat /opt/analytic/datareader/service/config/default.json | grep "sendStatisticsToES" | tee -a $LOG_FILE
@@ -353,6 +360,8 @@ echo "==========================================================================
 # Check if the file exists
 if [[ ! -f "$TARGET_FILE" ]]; then
   echo "Error: File not found: $TARGET_FILE" | tee -a $LOG_FILE
+   echo | tee -a "$LOG_FILE"
+  echo "Please advise support of missing file" | tee -a $LOG_FILE
   exit 1
 fi
 
@@ -379,7 +388,7 @@ else
   
    
    echo | tee -a "$LOG_FILE"
-   echo "thresholds are not default, no action will be taken" | tee -a $LOG_FILE
+   echo "thresholds are not default, no action will be taken for this item" | tee -a $LOG_FILE
       
 fi
 
@@ -405,7 +414,7 @@ else
    
    
    echo | tee -a "$LOG_FILE"
-   echo "statistics are not being sent, no action will be taken" | tee -a $LOG_FILE
+   echo "statistics are not being sent, no action will be taken for this item" | tee -a $LOG_FILE
    echo | tee -a "$LOG_FILE"
    
    
