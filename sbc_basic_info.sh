@@ -11,8 +11,9 @@ theSerial=$(dmidecode -t system | grep Serial | awk '{print $3}')
 LOG_FILE=/tmp/SBC_LOG_INFO-$HOST_NAME.log
 
 clear
-echo "***$CURRENT_TIMESTAMP - START OF LOG***" > $LOG_FILE
-
+echo "=======================================================================================" > $LOG_FILE
+echo "***$CURRENT_TIMESTAMP - START OF LOG***" >> $LOG_FILE
+echo "=======================================================================================" >> $LOG_FILE
 echo | tee -a "$LOG_FILE"
 echo "Script running, please wait" 
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
@@ -64,9 +65,6 @@ du -h / --exclude=/proc --exclude=/sys --exclude=/dev --exclude=/run --max-depth
 
 
 echo "=======================================================================================" >> $LOG_FILE
-
-echo "***MEMORY-PRINTOUT***" >> $LOG_FILE
-dmidecode -t memory | grep -i 'Size:' | grep -v 'No Module Installed' | awk '{sum += $2} END {print sum, "MB"}' >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 top -b -o %MEM | head -n 16 >> $LOG_FILE
 echo "=======================================================================================" >> $LOG_FILE
@@ -527,6 +525,16 @@ echo "==========================================================================
 echo "***BNETSCS-LOG_SNIPPET***" >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 
+
+echo "***BNETSCS-HOST-RESOLVING_ERROR***" >> $LOG_FILE
+
+cat /archive/logger/*/bnetscs* | grep "can not resolve host"  | tail -10 >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+cat /archive/logger/*/bnetscs* | grep "ERROR  - RESOLVER" | grep host  | tail -10 >> $LOG_FILE
+
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+echo "***BNETSCS-OTHER-ERRORS***" >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 
 grep -i "exceeded" /archive/logger/*/bnetscs_*  | grep -v "Info"  | tail -10  >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
