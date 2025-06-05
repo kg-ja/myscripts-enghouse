@@ -12,8 +12,9 @@ LOG_FILE=/tmp/ANALYTICS_LOG_INFO-$HOST_NAME.log
 
 clear
 
-
-echo "***$CURRENT_TIMESTAMP - START OF LOG***" > $LOG_FILE
+echo "=======================================================================================" > $LOG_FILE
+echo "***$CURRENT_TIMESTAMP - START OF LOG***" >> $LOG_FILE
+echo "=======================================================================================" >> $LOG_FILE
 echo | tee -a "$LOG_FILE"
 echo "Script running, please wait" 
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
@@ -164,7 +165,7 @@ echo "==========================================================================
 
 
 echo "***MAX/TOTAL-SHARD-PER-NODE***" >> $LOG_FILE
-echo "That setting is also set to -1 by default soemtimes, which means that there is no limit as to how many shards of a given index can be hosted on a specific data node" >> $LOG_FILE
+echo "That setting is also set to -1 by default sometimes, which means that there is no limit as to how many shards of a given index can be hosted on a specific data node" >> $LOG_FILE
 echo "Thats if no max shard per node set" >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 
@@ -175,11 +176,16 @@ echo "--------------------------------------------------------------------------
 echo "***TOTAL-SHARD-PER-NODE***" >> $LOG_FILE
 curl -s -XGET "$theIPaddress:9200/_cluster/settings?include_defaults=true&pretty=true" | grep "total_shards_per_node">> $LOG_FILE
 
-
-
-
 echo "=======================================================================================" >> $LOG_FILE
+echo "***WATERMARK VALUE***" >> $LOG_FILE
+echo >> $LOG_FILE
+echo >> $LOG_FILE
 
+curl -s -XGET "$theIPaddress:9200/_cluster/settings?include_defaults=true&pretty=true" | grep -A 4 "watermark"  >> $LOG_FILE
+
+echo >> $LOG_FILE
+echo "=======================================================================================" >> $LOG_FILE
+echo >> $LOG_FILE
 echo "***CLUSTER-HEALTH***" >> $LOG_FILE
 curl -s $theIPaddress:9200/_cat/health?v  >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
