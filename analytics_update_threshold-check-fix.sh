@@ -314,7 +314,7 @@ if echo "$STATUS_OUTPUT" | grep -q "Active: failed"; then
    if [[ -n "$PIDS" ]]; then
 	    echo "PIDS=[$PIDS]" | tee -a $LOG_FILE   
         echo "Killing Kibana process(es): $PIDS" | tee -a $LOG_FILE        
-        pkill -f  kibana
+        kill -9 $PIDS
         echo "Killed process $PIDS" | tee -a $LOG_FILE
         sleep 5
     else
@@ -346,6 +346,57 @@ echo | tee -a "$LOG_FILE"
 
 }
 
+check_elasticsearch_failed() {
+
+echo | tee -a "$LOG_FILE"
+echo | tee -a "$LOG_FILE"
+echo "=======================================================================================" | tee -a $LOG_FILE
+
+# Check the status of elasticsearch service
+echo "Checking elasticsearch service status..." | tee -a $LOG_FILE
+STATUS_OUTPUT=$(systemctl status elasticsearch 2>&1)
+
+if echo "$STATUS_OUTPUT" | grep -q "Active: failed"; then
+    echo "elasticsearch service is in a failed state." | tee -a $LOG_FILE
+
+    # Find elasticsearch process IDs and kill them
+    echo "Searching for elasticsearch processes..." | tee -a $LOG_FILE
+    PIDS=$(pgrep -f '/usr/share/elasticsearch/' | xargs)
+
+   if [[ -n "$PIDS" ]]; then
+	    echo "PIDS=[$PIDS]" | tee -a $LOG_FILE   
+        echo "Killing elasticsearch process(es): $PIDS" | tee -a $LOG_FILE        
+        kill -9 $PIDS
+        echo "Killed process $PIDS" | tee -a $LOG_FILE
+        sleep 5
+    else
+        echo "No elasticsearch processes found." | tee -a $LOG_FILE
+    fi
+
+    # Restart elasticsearch service
+    echo "Restarting elasticsearch service..." | tee -a $LOG_FILE
+    systemctl restart elasticsearch 
+    
+	sleep 5
+    # Confirm status
+    NEW_STATUS=$(systemctl status elasticsearch 2>&1)
+    if echo "$NEW_STATUS" | grep -q "Active: active"; then
+        echo "elasticsearch service restarted successfully." | tee -a $LOG_FILE
+    else
+        echo "Failed to restart elasticsearch service. Status: $NEW_STATUS" | tee -a $LOG_FILE
+    fi
+else
+    echo "elasticsearch service is not in a failed state." | tee -a $LOG_FILE
+    echo "Current status:" | tee -a $LOG_FILE
+    systemctl status elasticsearch | grep Active | tee -a $LOG_FILE
+	echo "=======================================================================================" | tee -a $LOG_FILE
+fi
+
+
+echo | tee -a "$LOG_FILE"
+echo | tee -a "$LOG_FILE"
+
+}
 
 
 
@@ -429,6 +480,8 @@ get_indices_info
 
 
 check_kibana_failed
+
+check_elasticsearch_failed
 
 sleep 3
 
