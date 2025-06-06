@@ -26,8 +26,8 @@ get_server_info() {
 # clear the screen to present the information
   clear
 
-echo "***$CURRENT_TIMESTAMP - START OF LOG***" > $LOG_FILE
-echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+echo "=======================================================================================" > $LOG_FILE
+echo "***$CURRENT_TIMESTAMP - START OF LOG***" >> $LOG_FILE
 echo "=======================================================================================" >> $LOG_FILE
 echo "***CPU-INFO***" >> $LOG_FILE
 lscpu >> $LOG_FILE
@@ -309,11 +309,12 @@ if echo "$STATUS_OUTPUT" | grep -q "Active: failed"; then
 
     # Find Kibana process IDs and kill them
     echo "Searching for Kibana processes..." | tee -a $LOG_FILE
-    PIDS=$(ps -ef | grep '[k]ibana' | awk '{print $2}') 
+    PIDS=$(pgrep -f '/usr/share/kibana/' | xargs)
 
-    if [[ -z "$PIDS" ]]; then
+   if [[ -n "$PIDS" ]]; then
+	    echo "PIDS=[$PIDS]" | tee -a $LOG_FILE   
         echo "Killing Kibana process(es): $PIDS" | tee -a $LOG_FILE        
-        kill -9 "$PID" | tee -a $LOG_FILE
+        pkill -f  kibana
         echo "Killed process $PID" | tee -a $LOG_FILE
         sleep 5
     else
@@ -322,7 +323,7 @@ if echo "$STATUS_OUTPUT" | grep -q "Active: failed"; then
 
     # Restart Kibana service
     echo "Restarting Kibana service..." | tee -a $LOG_FILE
-    systemctl restart kibana | tee -a $LOG_FILE
+    systemctl restart kibana 
     
 	sleep 5
     # Confirm status
@@ -336,6 +337,7 @@ else
     echo "Kibana service is not in a failed state." | tee -a $LOG_FILE
     echo "Current status:" | tee -a $LOG_FILE
     systemctl status kibana | grep Active | tee -a $LOG_FILE
+	echo "=======================================================================================" | tee -a $LOG_FILE
 fi
 
 
