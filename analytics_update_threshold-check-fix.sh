@@ -305,7 +305,7 @@ echo "Checking Kibana service status..." | tee -a $LOG_FILE
 STATUS_OUTPUT=$(systemctl status kibana 2>&1)
 
 if echo "$STATUS_OUTPUT" | grep -q "Active: failed"; then
-    echo "Kibana service is in a failed state." | tee -a $LOG_FILE
+    echo "❌ Kibana service is in a failed state." | tee -a $LOG_FILE
 
     # Find Kibana process IDs and kill them
     echo "Searching for Kibana processes..." | tee -a $LOG_FILE
@@ -356,8 +356,10 @@ echo "==========================================================================
 echo "Checking elasticsearch service status..." | tee -a $LOG_FILE
 STATUS_OUTPUT=$(systemctl status elasticsearch 2>&1)
 
-if echo "$STATUS_OUTPUT" | grep -q "Active: failed"; then
-    echo "elasticsearch service is in a failed state." | tee -a $LOG_FILE
+
+if echo "$STATUS_OUTPUT" | grep -qE "Active: (failed|inactive)"; then
+
+    echo "❌ Elasticsearch service is failed or inactive." | tee -a "$LOG_FILE"
 
     # Find elasticsearch process IDs and kill them
     echo "Searching for elasticsearch processes..." | tee -a $LOG_FILE
@@ -386,7 +388,7 @@ if echo "$STATUS_OUTPUT" | grep -q "Active: failed"; then
         echo "Failed to restart elasticsearch service. Status: $NEW_STATUS" | tee -a $LOG_FILE
     fi
 else
-    echo "elasticsearch service is not in a failed state." | tee -a $LOG_FILE
+    echo "elasticsearch service is not in a failed or inactive state." | tee -a $LOG_FILE
     echo "Current status:" | tee -a $LOG_FILE
     systemctl status elasticsearch | grep Active | tee -a $LOG_FILE
 	echo "=======================================================================================" | tee -a $LOG_FILE
