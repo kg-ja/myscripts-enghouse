@@ -315,7 +315,7 @@ if echo "$STATUS_OUTPUT" | grep -q "Active: failed"; then
 	    echo "PIDS=[$PIDS]" | tee -a $LOG_FILE   
         echo "Killing Kibana process(es): $PIDS" | tee -a $LOG_FILE        
         pkill -f  kibana
-        echo "Killed process $PID" | tee -a $LOG_FILE
+        echo "Killed process $PIDS" | tee -a $LOG_FILE
         sleep 5
     else
         echo "No Kibana processes found." | tee -a $LOG_FILE
