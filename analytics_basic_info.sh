@@ -191,6 +191,8 @@ curl -s $theIPaddress:9200/_cat/health?v  >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 curl -s $theIPaddress:9200/_cluster/health?pretty=true >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+echo "***CLUSTER-ALLOCATION***" >> $LOG_FILE
+echo >> $LOG_FILE
 curl -s -XGET $theIPaddress:9200/_cluster/allocation/explain?pretty >> $LOG_FILE
 echo "=======================================================================================" >> $LOG_FILE
 
@@ -314,12 +316,12 @@ tail -50 /var/log/elasticsearch/gc.log >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 echo "=======================================================================================" >> $LOG_FILE
 
-echo "***TOTAL-PERFORMANCES-INDICES***" >> $LOG_FILE
+echo "***TOTAL-PERFORMANCES-INDICES ON THIS NODE***" >> $LOG_FILE
 curl -s -XGET $theIPaddress:9200/_cat/indices/*performance-* | wc -l >> $LOG_FILE
 echo "=======================================================================================" >> $LOG_FILE
 
 
-echo "TOTAL stats-dialogic-performance-indices" >> $LOG_FILE
+echo "TOTAL stats-dialogic-performance-indices on this node" >> $LOG_FILE
 curl -s -XGET $theIPaddress:9200/_cat/indices/stats-dialogic-performance-* | wc -l  >> $LOG_FILE
 echo "=======================================================================================" >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
@@ -333,7 +335,7 @@ curl -s -XGET $theIPaddress:9200/_cat/indices/stats-dialogic-performance-$PREV_Y
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 
 
-echo "TOTAL dialogic-performance-indices" >> $LOG_FILE
+echo "TOTAL dialogic-performance-indices on this node" >> $LOG_FILE
 curl -s -XGET $theIPaddress:9200/_cat/indices/dialogic-performance-* | wc -l >> $LOG_FILE
 echo "=======================================================================================" >> $LOG_FILE
 echo "=======dialogic-performance count for current year===============================" >> $LOG_FILE
@@ -346,7 +348,7 @@ curl -s -XGET $theIPaddress:9200/_cat/indices/dialogic-performance-$PREV_YEAR* |
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 
 
-echo "*TOTAL dialogic-sbc-indices*" >> $LOG_FILE
+echo "*TOTAL dialogic-sbc-indices on this node*" >> $LOG_FILE
 curl -s -XGET $theIPaddress:9200/_cat/indices/dialogic-sbc-* | wc -l  >> $LOG_FILE
 echo "=======================================================================================" >> $LOG_FILE
 echo "=======dialogic-sbc-indices count for current year===============================" >> $LOG_FILE
