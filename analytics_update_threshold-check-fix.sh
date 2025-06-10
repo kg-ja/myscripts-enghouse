@@ -23,8 +23,6 @@ LOG_FILE=/tmp/CLEANDATA-THRESHOLD-UPDATE-$HOST_NAME.log
 # Function to get server details
 get_server_info() {
 
-# clear the screen to present the information
-  clear
 
 echo "=======================================================================================" > $LOG_FILE
 echo "***$CURRENT_TIMESTAMP - START OF LOG***" >> $LOG_FILE
@@ -67,10 +65,6 @@ echo "--------------------------------------------------------------------------
 curl -s -XGET $theIPaddress:9200 >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 
-
-echo "***ANALYTICS-PLATFORM-INFORMATION***" >> $LOG_FILE
-echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
-
 echo "*** HW/VM -License-Platform-Details***" >> $LOG_FILE
 
 dmidecode -t system | grep Manufacturer >> $LOG_FILE
@@ -97,25 +91,32 @@ rpm -qa | grep kexec >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 echo "=======================================================================================" >> $LOG_FILE
 
-echo "=======================================================================================" | tee -a $LOG_FILE
-
-echo | tee -a "$LOG_FILE"
-# Check current thresholds
-echo "CURRENT THRESHOLDS" | tee -a $LOG_FILE
-cat /etc/cron.hourly/clean_ES_data.sh | grep lower_threshold= | tee -a $LOG_FILE
-cat /etc/cron.hourly/clean_ES_data.sh | grep upper_threshold= | tee -a $LOG_FILE
 echo "=======================================================================================" >> $LOG_FILE
 
-echo | tee -a "$LOG_FILE"
-echo | tee -a "$LOG_FILE"
+echo >> $LOG_FILE
 
-# Check stats
-echo "=======================================================================================" >> $LOG_FILE
-cat /opt/analytic/datareader/service/config/default.json | grep "sendStatisticsToES" | tee -a $LOG_FILE
+echo "***Full summary of available and used disk space usage of the file system***" >> $LOG_FILE
+echo "***USED SPACE ABOVE 80% NEEDS ATTENTION***" >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+df -h >> $LOG_FILE
 echo "=======================================================================================" >> $LOG_FILE
 
-echo | tee -a "$LOG_FILE"
-echo | tee -a "$LOG_FILE"
+echo "===================================/data/nodes-size=======================================" >> $LOG_FILE
+
+du -sh /data/nodes >> $LOG_FILE
+
+echo "=======================================================================================" >> $LOG_FILE
+
+
+echo "***STORAGE-INFO***" >> $LOG_FILE
+
+du -h / --exclude=/proc --exclude=/sys --exclude=/dev --exclude=/run --max-depth=1 | sort -rh | head -20 >> $LOG_FILE
+
+
+echo "=======================================================================================" >> $LOG_FILE
+
+echo >> $LOG_FILE
+
 
 }
 
@@ -123,8 +124,53 @@ echo | tee -a "$LOG_FILE"
 
 get_indices_info() {
 
-echo | tee -a "$LOG_FILE"
-echo | tee -a "$LOG_FILE"
+echo >> $LOG_FILE
+
+echo "ANALYTICS-PLATFORM-INFORMATION" >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+
+
+echo "***ANALTICS-INFO***" >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+
+echo "***NODE-INFO***" >> $LOG_FILE
+curl -s $theIPaddress:9200/_cat/nodes?v  >> $LOG_FILE
+
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+
+
+echo "=======================================================================================" >> $LOG_FILE
+echo "***CLEAN-DATA-SCRIPT-LIMIT***" >> $LOG_FILE
+cat /etc/cron.hourly/clean_ES_data.sh | grep lower_threshold= >> $LOG_FILE
+cat /etc/cron.hourly/clean_ES_data.sh | grep upper_threshold= >> $LOG_FILE
+echo "=======================================================================================" >> $LOG_FILE
+
+echo >> $LOG_FILE
+echo "=======================================================================================" >> $LOG_FILE
+
+# Check current stats setup
+echo "DEFAULT CONFIG JSON"  >> $LOG_FILE
+
+cat /opt/analytic/datareader/service/config/default.json | grep "sendStatisticsToES"  >> $LOG_FILE
+
+echo "======================================================================================="  >> $LOG_FILE
+
+echo >> $LOG_FILE
+
+echo >> $LOG_FILE
+echo "***CLUSTER-HEALTH***" >> $LOG_FILE
+curl -s $theIPaddress:9200/_cat/health?v  >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+curl -s $theIPaddress:9200/_cluster/health?pretty=true >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+echo "***CLUSTER-ALLOCATION***" >> $LOG_FILE
+echo >> $LOG_FILE
+curl -s -XGET $theIPaddress:9200/_cluster/allocation/explain?pretty >> $LOG_FILE
+echo "=======================================================================================" >> $LOG_FILE
+
+
+echo >> $LOG_FILE
+echo >> $LOG_FILE
 
 echo "***TOTAL-SHARDS***" >> $LOG_FILE
 echo >> $LOG_FILE
@@ -133,12 +179,12 @@ echo >> $LOG_FILE
 echo "=======================================================================================" >> $LOG_FILE
 echo >> $LOG_FILE
 echo >> $LOG_FILE
-echo "***TOTAL-PERFORMANCES-INDICES***" >> $LOG_FILE
+echo "***TOTAL-PERFORMANCES-INDICES ON THIS NODE***" >> $LOG_FILE
 curl -s -XGET $theIPaddress:9200/_cat/indices/*performance-* | wc -l >> $LOG_FILE >> $LOG_FILE
 echo "=======================================================================================" >> $LOG_FILE
 
 
-echo "TOTAL stats-dialogic-performance-indices" >> $LOG_FILE
+echo "TOTAL stats-dialogic-performance-indices on this node" >> $LOG_FILE
 curl -s -XGET $theIPaddress:9200/_cat/indices/stats-dialogic-performance-* | wc -l  >> $LOG_FILE
 echo "=======================================================================================" >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
@@ -152,7 +198,7 @@ curl -s -XGET $theIPaddress:9200/_cat/indices/stats-dialogic-performance-$PREV_Y
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 
 
-echo "TOTAL dialogic-performance-indices" >> $LOG_FILE
+echo "TOTAL dialogic-performance-indices on this node" >> $LOG_FILE
 curl -s -XGET $theIPaddress:9200/_cat/indices/dialogic-performance-* | wc -l >> $LOG_FILE
 echo "=======================================================================================" >> $LOG_FILE
 echo "=======dialogic-performance count for current year===============================" >> $LOG_FILE
@@ -165,7 +211,7 @@ curl -s -XGET $theIPaddress:9200/_cat/indices/dialogic-performance-$PREV_YEAR* |
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 
 
-echo "*TOTAL dialogic-sbc-indices*" >> $LOG_FILE
+echo "*TOTAL dialogic-sbc-indices on this node*" >> $LOG_FILE
 curl -s -XGET $theIPaddress:9200/_cat/indices/dialogic-sbc-* | wc -l  >> $LOG_FILE
 echo "=======================================================================================" >> $LOG_FILE
 echo "=======dialogic-sbc-indices count for current year===============================" >> $LOG_FILE
@@ -186,6 +232,7 @@ echo | tee -a "$LOG_FILE"
 update_threshold() {
 
 echo | tee -a "$LOG_FILE"
+echo "Checki thresholds" | tee -a $LOG_FILE
 echo | tee -a "$LOG_FILE"
 
 echo "=======================================================================================" | tee -a $LOG_FILE
@@ -193,7 +240,7 @@ echo "==========================================================================
 echo "CURRENT THRESHOLDS" | tee -a $LOG_FILE
 cat /etc/cron.hourly/clean_ES_data.sh | grep lower_threshold= | tee -a $LOG_FILE
 cat /etc/cron.hourly/clean_ES_data.sh | grep upper_threshold= | tee -a $LOG_FILE
-echo "=======================================================================================" >> $LOG_FILE
+echo "=======================================================================================" | tee -a $LOG_FILE
 
 
 echo "Backing up clean ES data script" | tee -a $LOG_FILE
@@ -257,11 +304,6 @@ cp $TARGET_FILE2 /tmp/default.json-$(date +"%Y_%m_%d_%I_%M_%p")
 # change stats in default json
 sed -i 's/"sendStatisticsToES": true/"sendStatisticsToES": false/g' $TARGET_FILE2
 
-# delete all stats-dialogic-performance
-echo "Deleting all stats-performace indices" >> $LOG_FILE
-curl -s -XDELETE $theIPaddress:9200/stats-dialogic-performance-*
-sleep 1
-echo "all stats-performace indices deleted" >> $LOG_FILE
 
 #restart datareader srvice
 echo | tee -a "$LOG_FILE"
@@ -292,6 +334,22 @@ echo | tee -a "$LOG_FILE"
 
 }
 
+
+
+check_stats-performance_indices() {
+echo | tee -a "$LOG_FILE"
+
+# delete all stats-dialogic-performance
+if [ "$(curl -s -XGET $theIPaddress:9200/_cat/indices/stats-dialogic-performance-* | wc -l)" -eq 0 ]; then
+    echo "There are no stats-performance indices to delete" | tee -a $LOG_FILE
+else
+    echo "stats-performance indices are present and will now be deleted" | tee -a $LOG_FILE
+    curl -s -XDELETE $theIPaddress:9200/stats-dialogic-performance-*
+    sleep 1
+    echo "all stats-performace indices deleted" | tee -a $LOG_FILE
+fi
+
+}
 
 
 check_kibana_failed() {
@@ -342,13 +400,11 @@ fi
 
 
 echo | tee -a "$LOG_FILE"
-echo | tee -a "$LOG_FILE"
 
 }
 
 check_elasticsearch_failed() {
 
-echo | tee -a "$LOG_FILE"
 echo | tee -a "$LOG_FILE"
 echo "=======================================================================================" | tee -a $LOG_FILE
 
@@ -396,7 +452,6 @@ fi
 
 
 echo | tee -a "$LOG_FILE"
-echo | tee -a "$LOG_FILE"
 
 }
 
@@ -406,6 +461,10 @@ echo | tee -a "$LOG_FILE"
 
 # clear the screen to present the information
   clear
+  
+  echo "Script running, please wait" 
+  
+  echo | tee -a "$LOG_FILE"
   
   get_server_info
   get_indices_info
@@ -477,9 +536,9 @@ else
 fi
 
 
+check_stats-performance_indices
 
 get_indices_info
-
 
 check_kibana_failed
 
