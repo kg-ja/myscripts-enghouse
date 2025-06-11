@@ -11,8 +11,9 @@ EMSROLE=$(cat /var/adm/ems/server_role)
 LOG_FILE=/tmp/EMS_LOG_INFO-$HOST_NAME.log
 
 clear
-
-echo "***$CURRENT_TIMESTAMP - START OF LOG***" > $LOG_FILE
+echo "---------------------------------------------------------------------------------------" > $LOG_FILE
+echo "***$CURRENT_TIMESTAMP - START OF LOG***" >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 echo >> $LOG_FILE
 echo "Script running, please wait" 
 
@@ -53,6 +54,20 @@ dmidecode -t system | grep UUID >> $LOG_FILE
 echo "=======================================================================================" >> $LOG_FILE
 
 echo "*NETWORK INTERFACE PRINT*" >> $LOG_FILE
+
+echo >> $LOG_FILE
+echo "*NMCLI DEVICE STATUS" >> $LOG_FILE
+nmcli device status >> $LOG_FILE
+echo >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+
+echo >> $LOG_FILE
+echo "*NMCLI CONNECTION" >> $LOG_FILE
+nmcli connection >> $LOG_FILE
+echo >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+
+echo "=======================================================================================" >> $LOG_FILE
 
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 cd /etc/sysconfig/network-scripts
@@ -123,17 +138,22 @@ ls -ltrh >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 
 echo "***OS-RELEASE***" >> $LOG_FILE
+echo "/etc/redhat-release" >> $LOG_FILE
+cat /etc/redhat-release >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+echo "/etc/os-release" >> $LOG_FILE
 cat /etc/os-release >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
-cat /etc/redhat-release >>  $LOG_FILE
-echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+echo "/etc/centos-release" >> $LOG_FILE
+cat /etc/centos-release >> $LOG_FILE
 echo "=======================================================================================" >> $LOG_FILE
 
-echo "***KERNEL-VERSION***" >> $LOG_FILE
+echo "***KERNEL-VERSION ACTIVE***" >> $LOG_FILE
 uname -r >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+echo "***LIST-ALL-KERNEL-VERSIONS***" >> $LOG_FILE
+ls -l /boot/vmlinuz* >> $LOG_FILE
 echo "=======================================================================================" >> $LOG_FILE
-
 
 
 echo "***KEXEC-VERSION***" >> $LOG_FILE
@@ -176,6 +196,30 @@ echo "***DNS-INFO***" >> $LOG_FILE
 cd /etc
 cat resolv.conf >> $LOG_FILE
 echo "=======================================================================================" >> $LOG_FILE
+
+
+
+
+echo "***CHECK NALPEEIRON DNS RESOLUTION***" >> $LOG_FILE
+echo >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+ping -c 1 dialogic.nalpeiron.com >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+echo >> $LOG_FILE
+getent hosts dialogic.nalpeiron.com >> $LOG_FILE
+echo >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+echo >> $LOG_FILE
+
+if timeout 5 bash -c "</dev/tcp/dialogic.nalpeiron.com/80" &>/dev/null; then
+    echo "dialogic.nalpeiron.com port 80 is reachable" >> $LOG_FILE
+else
+    echo "dialogic.nalpeiron.com port 80 is not reachable" >> $LOG_FILE
+
+fi
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+echo >> $LOG_FILE
+
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 echo "***CRONTAB-ENTRIES***" >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
