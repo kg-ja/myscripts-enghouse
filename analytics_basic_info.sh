@@ -293,7 +293,29 @@ cat /var/log/analytic/datareader.log | grep "maximum shards open" | sort | tail 
 echo "=======================================================================================" >> $LOG_FILE
 
 echo "***PARSE-ERRORS-INFO-DATA-READER-LOG***" >> $LOG_FILE
-cat /var/log/analytic/datareader.log | grep "failed to parse"  | sort | tail -15  >> $LOG_FILE
+cat /var/log/analytic/datareader.log | grep "failed to parse"  | sort | tail -25  >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+cat /var/log/analytic/datareader.log | grep -i "error" | grep -i "parse" | sort | tail -25 >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+
+awk '
+/mapper_parsing_exception/ {
+    block = $0 ORS;
+    for (i = 0; i < 5; i++) {
+        if (getline) block = block $0 ORS;
+        else break;
+    }
+    entries[++count] = block;
+}
+END {
+    start = (count > 5) ? count - 4 : 1;
+    for (i = start; i <= count; i++) print entries[i];
+}
+' /var/log/analytic/datareader.log >> $LOG_FILE
+
+
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+
 echo "=======================================================================================" >> $LOG_FILE
 
 
