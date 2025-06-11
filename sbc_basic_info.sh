@@ -128,7 +128,23 @@ echo "*MGMT-VM*" >> $LOG_FILE
 cat /etc/sysconfig/network-scripts/ifcfg-eth0 | grep "DEVICE\|NAME" >> $LOG_FILE
 cat /etc/sysconfig/network-scripts/ifcfg-eth0 | grep "HWADDR\|MACADDR" >> $LOG_FILE
 echo "=======================================================================================" >> $LOG_FILE
+
+echo >> $LOG_FILE
+echo "*NMCLI DEVICE STATUS" >> $LOG_FILE
+nmcli device status >> $LOG_FILE
+echo >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+
+echo >> $LOG_FILE
+echo "*NMCLI CONNECTION" >> $LOG_FILE
+nmcli connection >> $LOG_FILE
+echo >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+
 echo "=======================================================================================" >> $LOG_FILE
+
+
+
 
 
 echo "***PLATFORM & PRODUCT***" >> $LOG_FILE
@@ -157,16 +173,22 @@ ls -ltrh >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 
 echo "***OS-RELEASE***" >> $LOG_FILE
+echo "/etc/redhat-release" >> $LOG_FILE
 cat /etc/redhat-release >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+echo "/etc/os-release" >> $LOG_FILE
 cat /etc/os-release >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+echo "/etc/centos-release" >> $LOG_FILE
+cat /etc/centos-release >> $LOG_FILE
 echo "=======================================================================================" >> $LOG_FILE
 
-echo "***KERNEL-VERSION***" >> $LOG_FILE
+echo "***KERNEL-VERSION ACTIVE***" >> $LOG_FILE
 uname -r >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+echo "***LIST-ALL-KERNEL-VERSIONS***" >> $LOG_FILE
+ls -l /boot/vmlinuz* >> $LOG_FILE
 echo "=======================================================================================" >> $LOG_FILE
-
 
 
 echo "***KEXEC-VERSION***" >> $LOG_FILE
