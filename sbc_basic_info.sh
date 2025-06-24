@@ -454,6 +454,14 @@ grep -i "GetNextIndex" /archive/logger/*/bnetscs_*  | grep -v "Info"  | tail -10
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 
 
+
+grep -i "MirroringQueue" /archive/logger/*/bnetscs_*  | grep -v "Info"  | tail -10  >> $LOG_FILE
+
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+
+
+
+
 grep -i "ACL" /archive/logger/*/bnetscs_*  | grep -v "Info"  | tail -10  >> $LOG_FILE
 
 
