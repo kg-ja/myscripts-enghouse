@@ -5,7 +5,7 @@ exec 2>/dev/null
 CURRENT_TIMESTAMP=$(date)
 HOST_NAME=$(hostname)
 theSerial=$(dmidecode -t system | grep Serial | awk '{print $3}')
-
+theIPaddress=$(ip addr show eth0 | grep "inet\b" | awk '{print $2}' | cut -d/ -f1)
 
 
 LOG_FILE=/tmp/SBC_LOG_INFO-$HOST_NAME.log
@@ -807,7 +807,7 @@ echo | tee -a "$LOG_FILE"
 
 chmod 755 $LOG_FILE
 
-mv $LOG_FILE /tmp/SBC_LOG_INFO-$HOST_NAME-$theSerial-$(date +"%Y_%m_%d_%I_%M_%p").log
+mv $LOG_FILE /tmp/SBC_LOG_INFO-$HOST_NAME-$theSerial-$theIPaddress-$(date +"%Y_%m_%d_%I_%M_%p").log
 
 echo "This script has completed, please check /tmp folder for SBC_LOG_INFO-* log to send to support" 
 
