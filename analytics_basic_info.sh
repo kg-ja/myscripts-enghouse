@@ -7,6 +7,7 @@ HOST_NAME=$(hostname)
 theIPaddress=$(ip addr show eth0 | grep "inet\b" | awk '{print $2}' | cut -d/ -f1)
 YEAR=$(date +"%Y")
 PREV_YEAR=$(date +"%Y" -d "last year")
+theSerial=$(dmidecode -t system | grep Serial | awk '{print $3}')
 
 LOG_FILE=/tmp/ANALYTICS_LOG_INFO-$HOST_NAME.log
 
@@ -56,6 +57,20 @@ echo "***ELK_VERSION***" >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 cat /usr/share/kibana/version_info >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+echo "=======================================================================================" >> $LOG_FILE
+echo >> $LOG_FILE
+echo "Version query for all modules" >> $LOG_FILE
+echo >> $LOG_FILE
+echo "Elasticsearch:" >> $LOG_FILE
+service elasticsearch version >> $LOG_FILE
+echo >> $LOG_FILE
+echo "Kibana:" >> $LOG_FILE
+service kibana version >> $LOG_FILE
+echo >> $LOG_FILE
+echo "Datareader:" >> $LOG_FILE
+service datareader version >> $LOG_FILE
+echo >> $LOG_FILE
+echo "=======================================================================================" >> $LOG_FILE
 
 
 echo "***ELASTICSEARCH_VERSION***" >> $LOG_FILE
@@ -181,7 +196,7 @@ curl -s -XGET "$theIPaddress:9200/_cluster/settings?include_defaults=true&pretty
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 
 echo "***TOTAL-SHARD-PER-NODE***" >> $LOG_FILE
-curl -s -XGET "$theIPaddress:9200/_cluster/settings?include_defaults=true&pretty=true" | grep "total_shards_per_node">> $LOG_FILE
+curl -s -XGET "$theIPaddress:9200/_cluster/settings?include_defaults=true&pretty=true" | grep "total_shards_per_node" >> $LOG_FILE
 
 echo "=======================================================================================" >> $LOG_FILE
 echo "***WATERMARK VALUE***" >> $LOG_FILE
@@ -457,7 +472,7 @@ clear
 
 chmod 755 $LOG_FILE
 
-mv $LOG_FILE /tmp/ANALYTICS_LOG_INFO-$HOST_NAME-$(date +"%Y_%m_%d_%I_%M_%p").log
+mv $LOG_FILE /tmp/ANALYTICS_LOG_INFO-$HOST_NAME-$theSerial-$theIPaddress-$(date +"%Y_%m_%d_%I_%M_%p").log
 
 echo "This script has completed, please check /tmp folder for ANALYTICS_LOG_INFO-* log to send to support" 
 
