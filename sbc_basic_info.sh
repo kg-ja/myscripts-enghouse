@@ -5,7 +5,8 @@ exec 2>/dev/null
 CURRENT_TIMESTAMP=$(date)
 HOST_NAME=$(hostname)
 theSerial=$(dmidecode -t system | grep Serial | awk '{print $3}')
-theIPaddress=$(ip addr show eth0 | grep "inet\b" | awk '{print $2}' | cut -d/ -f1)
+theIPaddressVM=$(ip addr show eth0 | grep "inet\b" | awk '{print $2}' | cut -d/ -f1 | head -n1)
+theIPaddressHW=$(ip addr show mgmt | grep "inet\b" | awk '{print $2}' | cut -d/ -f1 | head -n1)
 
 
 LOG_FILE=/tmp/SBC_LOG_INFO-$HOST_NAME.log
@@ -18,6 +19,9 @@ echo | tee -a "$LOG_FILE"
 echo "Script running, please wait" 
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 echo "Hostname of this server is $HOST_NAME" >> $LOG_FILE
+echo "=======================================================================================" >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+echo "IP Address of this server is $theIPaddressVM-$theIPaddressHW" >> $LOG_FILE
 echo "=======================================================================================" >> $LOG_FILE
 echo >> $LOG_FILE
 /opt/bnet/scripts/swMgr Summary >> $LOG_FILE
@@ -467,6 +471,40 @@ grep -i "ACL" /archive/logger/*/bnetscs_*  | grep -v "Info"  | tail -10  >> $LOG
 
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 
+echo "***BNETSCS-MISSING PEER_ERROR***" >> $LOG_FILE
+
+echo "-------------------------------" >> $LOG_FILE
+
+echo " Amount of Entries:" >> $LOG_FILE
+
+echo >> $LOG_FILE
+
+grep -i "SipPeer" /archive/logger/*/bnetscs_*  | grep -v "Info"  | wc -l >> $LOG_FILE
+
+echo >> $LOG_FILE
+
+grep -i "SipPeer" /archive/logger/*/bnetscs_*  | grep -v "Info"  | tail -30 >> $LOG_FILE
+
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+
+echo " Amount of Entries:" >> $LOG_FILE
+
+echo >> $LOG_FILE
+
+grep -i "peers/sip" /archive/logger/*/bnetscs_*  | grep -v "Info"  | wc -l >> $LOG_FILE
+
+echo >> $LOG_FILE
+
+
+grep -i "peers/sip" /archive/logger/*/bnetscs_*  | grep -v "Info"  | tail -30  >> $LOG_FILE
+
+
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+
+
+
 grep -i "Bad pointer\|RA_Alloc" /archive/logger/*/bnetscs_* | tail -10 >> $LOG_FILE
 
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
@@ -807,7 +845,7 @@ echo | tee -a "$LOG_FILE"
 
 chmod 755 $LOG_FILE
 
-mv $LOG_FILE /tmp/SBC_LOG_INFO-$HOST_NAME-$theSerial-$theIPaddress-$(date +"%Y_%m_%d_%I_%M_%p").log
+mv $LOG_FILE /tmp/SBC_LOG_INFO-$HOST_NAME-$theSerial-$theIPaddressVM-$theIPaddressHW-$(date +"%Y_%m_%d_%I_%M_%p").log
 
 echo "This script has completed, please check /tmp folder for SBC_LOG_INFO-* log to send to support" 
 
