@@ -8,6 +8,9 @@ EMSIP=$(cat /var/adm/ems/ems_ip)
 theSerial=$(dmidecode -t system | grep Serial | awk '{print $3}')
 EMSROLE=$(cat /var/adm/ems/server_role)
 
+theIPaddressVM=$(ip addr show eth0 | grep "inet\b" | awk '{print $2}' | cut -d/ -f1 | head -n1)
+theIPaddressHW=$(ip addr show eno1 | grep "inet\b" | awk '{print $2}' | cut -d/ -f1 | head -n1)
+
 LOG_FILE=/tmp/EMS_LOG_INFO-$HOST_NAME.log
 
 clear
@@ -19,6 +22,9 @@ echo "Script running, please wait"
 
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 echo "Hostname of this server is $HOST_NAME" >> $LOG_FILE
+echo "=======================================================================================" >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+echo "IP Address of this server is $theIPaddressVM-$theIPaddressHW" >> $LOG_FILE
 echo "=======================================================================================" >> $LOG_FILE
 
 echo "***-HARDWARE-PLATFORM-INFORMATION***" >> $LOG_FILE
@@ -492,7 +498,7 @@ echo "==========================================================================
 
 chmod 755 $LOG_FILE
 
-mv $LOG_FILE /tmp/EMS_LOG_INFO-$HOST_NAME-$EMSROLE-$EMSIP-$theSerial-$(date +"%Y_%m_%d_%I_%M_%p").log
+mv $LOG_FILE /tmp/EMS_LOG_INFO-$HOST_NAME-$EMSROLE-$theSerial-$theIPaddressVM-$theIPaddressHW-$(date +"%Y_%m_%d_%I_%M_%p").log
 
 echo "This script has completed, please check /tmp folder for EMS_LOG_INFO-* log to send to support" 
 
