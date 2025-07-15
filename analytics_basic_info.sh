@@ -4,7 +4,7 @@ exec 2>/dev/null
 
 CURRENT_TIMESTAMP=$(date)
 HOST_NAME=$(hostname)
-theIPaddress=$(ip addr show eth0 | grep "inet\b" | awk '{print $2}' | cut -d/ -f1)
+theIPaddress=$(ip addr show eth0 | grep "inet\b" | awk '{print $2}' | cut -d/ -f1 | head -n1)
 YEAR=$(date +"%Y")
 PREV_YEAR=$(date +"%Y" -d "last year")
 theSerial=$(dmidecode -t system | grep Serial | awk '{print $3}')
