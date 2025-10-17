@@ -13,7 +13,8 @@ PREV_YEAR=$(date +"%Y" -d "last year")
 
 CURRENT_TIMESTAMP=`date`
 HOST_NAME=`hostname`
-theIPaddress=$(ip addr show eth0 | grep "inet\b" | awk '{print $2}' | cut -d/ -f1)
+iface=$(ip -o link show | awk -F': ' '$1==2 {print $2}')
+theIPaddress=$(ip addr show $iface | grep "inet\b" | awk '{print $2}' | cut -d/ -f1 | head -n1)
 
 
 
@@ -44,6 +45,7 @@ echo "--------------------------------------------------------------------------
 free -k >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 echo "=======================================================================================" >> $LOG_FILE
+echo "INTERFACE NAME OF THIS SYSTEM IS: $iface" >> $LOG_FILE
 echo "=======================================================================================" >> $LOG_FILE
 
 echo "IP ADDRESS OF THIS SYSTEM IS: $theIPaddress" >> $LOG_FILE
