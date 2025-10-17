@@ -4,7 +4,8 @@ exec 2>/dev/null
 
 CURRENT_TIMESTAMP=$(date)
 HOST_NAME=$(hostname)
-theIPaddress=$(ip addr show eth0 | grep "inet\b" | awk '{print $2}' | cut -d/ -f1 | head -n1)
+iface=$(ip -o link show | awk -F': ' '$1==2 {print $2}')
+theIPaddress=$(ip addr show $iface | grep "inet\b" | awk '{print $2}' | cut -d/ -f1 | head -n1)
 YEAR=$(date +"%Y")
 PREV_YEAR=$(date +"%Y" -d "last year")
 theSerial=$(dmidecode -t system | grep Serial | awk '{print $3}')
@@ -40,6 +41,8 @@ echo "--------------------------------------------------------------------------
 echo "=======================================================================================" >> $LOG_FILE
 echo "=======================================================================================" >> $LOG_FILE
 
+echo "INTERFACE NAME OF THIS SYSTEM IS: $iface" >> $LOG_FILE
+echo "=======================================================================================" >> $LOG_FILE
 echo "IP ADDRESS OF THIS SYSTEM IS: $theIPaddress" >> $LOG_FILE
 echo "=======================================================================================" >> $LOG_FILE
 
@@ -256,6 +259,8 @@ echo "==========================================================================
 
 echo "***NETWORK-STATS***" >> $LOG_FILE
 ip address >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+ip -o link show >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 ifconfig -a >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
