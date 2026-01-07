@@ -5,7 +5,19 @@ HOST_NAME=$(hostname)
 iface=$(ip -o link show | awk -F': ' '$1==2 {print $2}')
 theIPaddress=$(ip addr show $iface | grep "inet\b" | awk '{print $2}' | cut -d/ -f1 | head -n1)
 
-DIR=/root/sipp-3.7.3
+DIR=/root/sipp-3.7.7/
+
+
+uacserverIP=192.168.5.5
+uacserverPort=5060
+
+uassserverIP=192.168.6.228
+uassserverPort=5060
+
+SBC1UACIP=192.168.2.101
+
+
+SBC1UASIP=192.168.1.101
 
 LOG_FILE=/tmp/SIPp_CALL_LOG_INFO-$HOST_NAME.log
 
@@ -39,7 +51,7 @@ echo "==========================SIPp-CALL-STARTED-$CURRENT_TIMESTAMP============
 cd $DIR
 
 # Launch script in background
-./sipp -sf uas-2reinv-fax.xml -i 192.168.6.228 -p 5060 &
+./sipp -sf uas-2reinv-fax.xml -i $uassserverIP -p $uassserverPort &
 
 # Get its PID for command above
 PID=$!
@@ -47,9 +59,9 @@ PID=$!
 echo "===The-PID-for-SIpp-is-$PID ===" >> $LOG_FILE
 
 
-echo "===SIPp-CALLING-SBC IP 192.168.2.101===" >> $LOG_FILE
+echo "===SIPp-CALLING-SBC IP 192.168.2.100===" >> $LOG_FILE
 
-./sipp -i 192.168.5.5 -p 5060 -sf uac-2reinv-fax.xml -nr -m 1 -inf usercalls2000.csv -d 10000 -l 1 192.168.2.101:5060
+./sipp -i $uacserverIP -p $uacserverPort -sf uac-2reinv-fax.xml -nr -m 1 -inf usercalls2000.csv -d 10000 -l 1 $SBC1UACIP:5060
 
 
 sleep 5
