@@ -390,6 +390,10 @@ echo "--------------------------------------------------------------------------
 echo "***BNETDAS-SERVICE***" >> $LOG_FILE
 systemctl status bnetdas | grep "Active\b" >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+echo "***BNETFTR-SERVICE***" >> $LOG_FILE
+systemctl status bnetftr | grep "Active\b" >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 echo "***BNETGSM-SERVICE***" >> $LOG_FILE
 systemctl status bnetgsm | grep "Active\b" >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
