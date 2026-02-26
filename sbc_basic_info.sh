@@ -400,12 +400,17 @@ echo "--------------------------------------------------------------------------
 echo "***BNETFMS-SERVICE***" >> $LOG_FILE
 systemctl status bnetfms | grep "Active\b" >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
-echo "***POSTGRES***" >> $LOG_FILE
-systemctl status postgres* | grep "Active\b" >> $LOG_FILE
-echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 echo "***SBCRESTAPI***" >> $LOG_FILE
 systemctl status sbcrestapi | grep "Active\b" >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+echo "***POSTGRES***" >> $LOG_FILE
+systemctl status postgres* | grep "Active\b" >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+echo "***ps -ef | grep postgres***" >> $LOG_FILE
+ps -ef | grep postgres >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+
 echo "=======================================================================================" >> $LOG_FILE
 ps -ef | grep runbnet >> $LOG_FILE
 echo "=======================================================================================" >> $LOG_FILE
