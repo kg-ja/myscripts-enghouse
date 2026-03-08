@@ -29,16 +29,13 @@ commands=(
 "0"
 )
 
-{
+(
 sleep 3
-
-for cmd in "${commands[@]}"
-do
+for cmd in "${commands[@]}"; do
     echo "$cmd"
     sleep 6
 done
-
-} | $CMD | tee -a "$LOG_FILE"
+) | script -q -a -c "$CMD" "$LOG_FILE"
 
 echo >> "$LOG_FILE"
 echo "Run complete: $(date)" >> "$LOG_FILE"
