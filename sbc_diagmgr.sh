@@ -3,8 +3,8 @@
 CURRENT_TIMESTAMP=$(date)
 HOST_NAME=$(hostname)
 SERIAL=$(dmidecode -t system | awk '/Serial/ {print $3}')
-IP_VM=$(ip -4 addr show eth0 | awk '/inet / {print $2}' | cut -d/ -f1 | head -n1)
-IP_HW=$(ip -4 addr show mgmt | awk '/inet / {print $2}' | cut -d/ -f1 | head -n1)
+IP_VM=$(ip -4 addr show eth0 2>/dev/null | awk '/inet / {print $2}' | cut -d/ -f1 | head -n1)
+IP_HW=$(ip -4 addr show mgmt 2>/dev/null | awk '/inet / {print $2}' | cut -d/ -f1 | head -n1)
 
 LOG_FILE=/tmp/sbc_$HOST_NAME-diagmgr_output.txt
 CMD=/opt/bnet/tools/rundiagmgr
