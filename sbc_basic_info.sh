@@ -14,6 +14,7 @@ LOG_FILE=/tmp/SBC_LOG_INFO-$HOST_NAME.log
 hardware_platform()
 {
 
+echo "1.HARDWARE BASIC INFO" >> $LOG_FILE
 echo >> "$LOG_FILE"
 echo "=======================================================================================" >> "$LOG_FILE"
 echo "Date: $CURRENT_TIMESTAMP" >> "$LOG_FILE"
@@ -48,7 +49,9 @@ echo >> "$LOG_FILE"
 hardware_plat_details()
 
 {
-echo "***-HARDWARE-PLATFORM-INFORMATION***" >> $LOG_FILE
+echo >> "$LOG_FILE"
+
+echo "2.HARDWARE-PLATFORM-INFORMATION" >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 
 echo "***CPU-INFO***" >> $LOG_FILE
@@ -76,6 +79,8 @@ echo "==========================================================================
 hardware_os()
 
 {
+echo >> "$LOG_FILE"
+echo "3.SOFTWARE OS KERNEL DETAILS" >> $LOG_FILE
 cd /opt/bnet
 ls -ltrh >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
@@ -111,6 +116,8 @@ echo "==========================================================================
 cpu_memory_details()
 
 {
+echo >> "$LOG_FILE"
+echo "4.CPU MEMORY DETAILS" >> $LOG_FILE
 
 echo "=======================================================================================" >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
@@ -142,6 +149,8 @@ echo "==========================================================================
 
 timedate_info ()
 {
+echo >> "$LOG_FILE"
+echo "5.TIME SYNCHRONIZATION" >> $LOG_FILE
 echo "=======================================================================================" >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 echo "***TIME-SYNC***" >> $LOG_FILE
@@ -166,6 +175,8 @@ echo "==========================================================================
 host_dns_info()
 
 {
+echo >> "$LOG_FILE"
+echo "6.HOST DNS INFO" >> $LOG_FILE
 echo "***HOST-INFO***" >> $LOG_FILE
 cd /etc
 cat hostname >> $LOG_FILE
@@ -183,7 +194,8 @@ echo "==========================================================================
 storage_info ()
 
 {
-
+echo >> "$LOG_FILE"
+echo "7.STORAGE INFO" >> $LOG_FILE
 echo "***Full summary of available and used disk space usage of the file system***" >> $LOG_FILE
 df -h >> $LOG_FILE
 echo "=======================================================================================" >> $LOG_FILE
@@ -206,8 +218,10 @@ du -h / --exclude=/proc --exclude=/sys --exclude=/dev --exclude=/run --max-depth
 
 sbc_details ()
 {
+echo >> "$LOG_FILE"
 echo "=======================================================================================" >> $LOG_FILE
-
+echo "8.SBC DETAILS" >> $LOG_FILE
+echo >> "$LOG_FILE"
 
 
 cd /config/mibs/current/platform/host
@@ -341,7 +355,7 @@ echo "***SDRs-ANALYTICS***" >> $LOG_FILE
 cd /eventdata/analytic
 ls -1 | wc -l >> $LOG_FILE
 
-
+echo >> "$LOG_FILE"
 
 echo "***BNET-SERVICES-INFO***" >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
@@ -697,8 +711,8 @@ echo "==========================================================================
 
 network_details()
 {
-
-echo "*NETWORK INTERFACE PRINT*" >> $LOG_FILE
+echo >> "$LOG_FILE"
+echo "9.NETWORK DETAILS" >> $LOG_FILE
 
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 cd /etc/sysconfig/network-scripts

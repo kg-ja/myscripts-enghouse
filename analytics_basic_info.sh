@@ -5,25 +5,46 @@ exec 2>/dev/null
 CURRENT_TIMESTAMP=$(date)
 HOST_NAME=$(hostname)
 iface=$(ip -o link show | awk -F': ' '$1==2 {print $2}')
-theIPaddress=$(ip addr show $iface | grep "inet\b" | awk '{print $2}' | cut -d/ -f1 | head -n1)
+IP_VM=$(ip addr show $iface | grep "inet\b" | awk '{print $2}' | cut -d/ -f1 | head -n1)
 YEAR=$(date +"%Y")
 PREV_YEAR=$(date +"%Y" -d "last year")
 theSerial=$(dmidecode -t system | grep Serial | awk '{print $3}')
 
 LOG_FILE=/tmp/ANALYTICS_LOG_INFO-$HOST_NAME.log
 
-clear
 
-echo "=======================================================================================" > $LOG_FILE
-echo "***$CURRENT_TIMESTAMP - START OF LOG***" >> $LOG_FILE
-echo "=======================================================================================" >> $LOG_FILE
-echo | tee -a "$LOG_FILE"
-echo "Script running, please wait" 
+hardware_platform()
+{
+echo >> "$LOG_FILE"
+echo "1.HARDWARE BASIC INFO" >> $LOG_FILE
+echo >> "$LOG_FILE"
+echo "=======================================================================================" >> "$LOG_FILE"
+echo "Date: $CURRENT_TIMESTAMP" >> "$LOG_FILE"
+echo "Hostname: $HOST_NAME" >> "$LOG_FILE"
+echo "VM MGMT IP: $IP_VM" >> "$LOG_FILE"
+echo "INTERFACE NAME: $iface" >> "$LOG_FILE"
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
-echo "=======================================================================================" >> $LOG_FILE
+echo "HW/VM -SBC-License-Platform-Details" >> $LOG_FILE
+dmidecode -t system | grep Manufacturer >> $LOG_FILE
+dmidecode -t system | grep Product >> $LOG_FILE
+dmidecode -t system | grep Serial >> $LOG_FILE
+dmidecode -t system | grep UUID >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+
+echo >> "$LOG_FILE"
+
+}
+
+hardware_plat_details()
+
+{
+echo >> "$LOG_FILE"
+
+echo "2.HARDWARE-PLATFORM-INFORMATION" >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+
 echo "***CPU-INFO***" >> $LOG_FILE
 lscpu >> $LOG_FILE
-echo "=======================================================================================" >> $LOG_FILE
 
 echo "=======================================================================================" >> $LOG_FILE
 echo "***MEMORY-PRINTOUT***" >> $LOG_FILE
@@ -41,59 +62,14 @@ echo "--------------------------------------------------------------------------
 echo "=======================================================================================" >> $LOG_FILE
 echo "=======================================================================================" >> $LOG_FILE
 
-echo "INTERFACE NAME OF THIS SYSTEM IS: $iface" >> $LOG_FILE
-echo "=======================================================================================" >> $LOG_FILE
-echo "IP ADDRESS OF THIS SYSTEM IS: $theIPaddress" >> $LOG_FILE
-echo "=======================================================================================" >> $LOG_FILE
+}
 
-echo "Hostname of this server is $HOST_NAME" >> $LOG_FILE
-echo "=======================================================================================" >> $LOG_FILE
+hardware_os()
 
-echo "HOSTS FILE" >> $LOG_FILE
+{
+echo >> "$LOG_FILE"
+echo "3.SOFTWARE OS KERNEL DETAILS" >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
-cat /etc/hosts >> $LOG_FILE
-echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
-echo "=======================================================================================" >> $LOG_FILE
-
-echo "***ELK_VERSION***" >> $LOG_FILE
- cat /opt/analytic/datareader/version_info >> $LOG_FILE
-echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
-cat /usr/share/kibana/version_info >> $LOG_FILE
-echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
-echo "=======================================================================================" >> $LOG_FILE
-echo >> $LOG_FILE
-echo "Version query for all modules" >> $LOG_FILE
-echo >> $LOG_FILE
-echo "Elasticsearch:" >> $LOG_FILE
-service elasticsearch version >> $LOG_FILE
-echo >> $LOG_FILE
-echo "Kibana:" >> $LOG_FILE
-service kibana version >> $LOG_FILE
-echo >> $LOG_FILE
-echo "Datareader:" >> $LOG_FILE
-service datareader version >> $LOG_FILE
-echo >> $LOG_FILE
-echo "=======================================================================================" >> $LOG_FILE
-
-
-echo "***ELASTICSEARCH_VERSION***" >> $LOG_FILE
-curl -s -XGET $theIPaddress:9200 | grep "number" >> $LOG_FILE
-echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
-curl -s -XGET $theIPaddress:9200 >> $LOG_FILE
-echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
-
-
-echo "***ANALYTICS-PLATFORM-INFORMATION***" >> $LOG_FILE
-echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
-
-echo "*** HW/VM -License-Platform-Details***" >> $LOG_FILE
-
-dmidecode -t system | grep Manufacturer >> $LOG_FILE
-dmidecode -t system | grep Product >> $LOG_FILE
-dmidecode -t system | grep Serial >> $LOG_FILE
-dmidecode -t system | grep UUID >> $LOG_FILE
-echo "=======================================================================================" >> $LOG_FILE
-
 
 echo "***OS-RELEASE***" >> $LOG_FILE
 echo "/etc/redhat-release" >> $LOG_FILE
@@ -118,46 +94,150 @@ echo "***KEXEC-VERSION***" >> $LOG_FILE
 rpm -qa | grep kexec >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 echo "=======================================================================================" >> $LOG_FILE
+}
 
+cpu_memory_details()
 
-echo "***Full summary of available and used disk space usage of the file system***" >> $LOG_FILE
-echo "***USED SPACE ABOVE 80% NEEDS ATTENTION***" >> $LOG_FILE
+{
+echo >> "$LOG_FILE"
+echo "4.CPU MEMORY DETAILS" >> $LOG_FILE
+
+echo "=======================================================================================" >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
-df -h >> $LOG_FILE
+echo "***MEMORY-PRINTOUT***" >> $LOG_FILE
+top -b -o %MEM | head -n 16 >> $LOG_FILE
 echo "=======================================================================================" >> $LOG_FILE
 
-echo "===================================/data/nodes-size=======================================" >> $LOG_FILE
+echo "***CPU-PRINTOUT***" >> $LOG_FILE
+top -b -o %CPU | head -n 16 >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+cat /proc/kbnet/cpu_usage >> $LOG_FILE
+echo "=======================================================================================" >> $LOG_FILE
+
+echo "=======================================================================================" >> $LOG_FILE
+echo "***SYSTEM-UPTIME-INFO***" >> $LOG_FILE
+uptime >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+echo "***Time Of Last System Boot***" >> $LOG_FILE
+who -b >> $LOG_FILE
+echo "=======================================================================================" >> $LOG_FILE
+
+echo "***System Reboots***" >> $LOG_FILE
+last reboot >> $LOG_FILE
+echo "=======================================================================================" >> $LOG_FILE
+
+}
+
+timedate_info ()
+{
+echo >> "$LOG_FILE"
+echo "5.TIME SYNCHRONIZATION" >> $LOG_FILE
+echo "=======================================================================================" >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+echo "***TIME-SYNC***" >> $LOG_FILE
+echo >> "$LOG_FILE"
+timedatectl status >> $LOG_FILE
+echo >> "$LOG_FILE"
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+cat /etc/chrony.conf >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+
+echo "***TIME-SOURCES-TRACKING***" >> $LOG_FILE
+echo >> "$LOG_FILE"
+chronyc sources >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+chronyc tracking >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+chronyc ntpdata >> $LOG_FILE
+echo "=======================================================================================" >> $LOG_FILE
+}
+
+
+host_dns_info()
+
+{
+echo >> "$LOG_FILE"
+echo "6.HOST DNS INFO" >> $LOG_FILE
+echo "***HOST-INFO***" >> $LOG_FILE
+cd /etc
+cat hostname >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+cat hosts >> $LOG_FILE
+echo "=======================================================================================" >> $LOG_FILE
+
+echo "***DNS-INFO***" >> $LOG_FILE
+cd /etc
+cat resolv.conf >> $LOG_FILE
+echo "=======================================================================================" >> $LOG_FILE
+}
+
+
+
+storage_info ()
+
+{
+echo >> "$LOG_FILE"
+echo "7.STORAGE INFO" >> $LOG_FILE
+echo "***Full summary of available and used disk space usage of the file system***" >> $LOG_FILE
+df -h >> $LOG_FILE
+echo "=======================================================================================" >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+echo "***STORAGE-INFO***" >> $LOG_FILE
+decho "===================================/data/nodes-size=======================================" >> $LOG_FILE
 
 du -sh /data/nodes >> $LOG_FILE
 
 echo "=======================================================================================" >> $LOG_FILE
-
-
-echo "***STORAGE-INFO***" >> $LOG_FILE
 
 du -h / --exclude=/proc --exclude=/sys --exclude=/dev --exclude=/run --max-depth=1 | sort -rh | head -20 >> $LOG_FILE
 
 
 echo "=======================================================================================" >> $LOG_FILE
 
+}
 
-echo "***MEMORY-PRINOUT***" >> $LOG_FILE
-free -h >> $LOG_FILE
+
+analytics_details ()
+{
+echo >> "$LOG_FILE"
+echo "=======================================================================================" >> $LOG_FILE
+echo "8.ANALYTICS DETAILS" >> $LOG_FILE
+echo >> "$LOG_FILE"
+echo "***ELK_VERSION***" >> $LOG_FILE
+ cat /opt/analytic/datareader/version_info >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
-top -b -o %MEM | head -n 16 >> $LOG_FILE
+cat /usr/share/kibana/version_info >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+echo "=======================================================================================" >> $LOG_FILE
+echo >> $LOG_FILE
+echo "Version query for all modules" >> $LOG_FILE
+echo >> $LOG_FILE
+echo "Elasticsearch:" >> $LOG_FILE
+service elasticsearch version >> $LOG_FILE
+echo >> $LOG_FILE
+echo "Kibana:" >> $LOG_FILE
+service kibana version >> $LOG_FILE
+echo >> $LOG_FILE
+echo "Datareader:" >> $LOG_FILE
+service datareader version >> $LOG_FILE
+echo >> $LOG_FILE
 echo "=======================================================================================" >> $LOG_FILE
 
-echo "***CPU-PRINTOUT***" >> $LOG_FILE
-top -b -o %CPU | head -n 16 >> $LOG_FILE
 
-echo "=======================================================================================" >> $LOG_FILE
+echo "***ELASTICSEARCH_VERSION***" >> $LOG_FILE
+curl -s -XGET $IP_VM:9200 | grep "number" >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+curl -s -XGET $IP_VM:9200 >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 
 
+echo "***ANALYTICS-PLATFORM-INFORMATION***" >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 echo "***ANALTICS-INFO***" >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 
 echo "***NODE-INFO***" >> $LOG_FILE
-curl -s $theIPaddress:9200/_cat/nodes?v  >> $LOG_FILE
+curl -s $IP_VM:9200/_cat/nodes?v  >> $LOG_FILE
 
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 
@@ -183,7 +263,7 @@ echo >> $LOG_FILE
 
 echo "***TOTAL-SHARDS***" >> $LOG_FILE
 echo >> $LOG_FILE
-curl -s -XGET $theIPaddress:9200/_cluster/stats?filter_path=indices.shards.total  >> $LOG_FILE
+curl -s -XGET $IP_VM:9200/_cluster/stats?filter_path=indices.shards.total  >> $LOG_FILE
 echo >> $LOG_FILE
 echo "=======================================================================================" >> $LOG_FILE
 
@@ -195,30 +275,30 @@ echo "Thats if no max shard per node set" >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 
 echo "***MAX-SHARD-PER-NODE***" >> $LOG_FILE
-curl -s -XGET "$theIPaddress:9200/_cluster/settings?include_defaults=true&pretty=true" | grep "max_shards_per_node"  >> $LOG_FILE
+curl -s -XGET "$IP_VM:9200/_cluster/settings?include_defaults=true&pretty=true" | grep "max_shards_per_node"  >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 
 echo "***TOTAL-SHARD-PER-NODE***" >> $LOG_FILE
-curl -s -XGET "$theIPaddress:9200/_cluster/settings?include_defaults=true&pretty=true" | grep "total_shards_per_node" >> $LOG_FILE
+curl -s -XGET "$IP_VM:9200/_cluster/settings?include_defaults=true&pretty=true" | grep "total_shards_per_node" >> $LOG_FILE
 
 echo "=======================================================================================" >> $LOG_FILE
 echo "***WATERMARK VALUE***" >> $LOG_FILE
 echo >> $LOG_FILE
 echo >> $LOG_FILE
 
-curl -s -XGET "$theIPaddress:9200/_cluster/settings?include_defaults=true&pretty=true" | grep -A 4 "watermark"  >> $LOG_FILE
+curl -s -XGET "$IP_VM:9200/_cluster/settings?include_defaults=true&pretty=true" | grep -A 4 "watermark"  >> $LOG_FILE
 
 echo >> $LOG_FILE
 echo "=======================================================================================" >> $LOG_FILE
 echo >> $LOG_FILE
 echo "***CLUSTER-HEALTH***" >> $LOG_FILE
-curl -s $theIPaddress:9200/_cat/health?v  >> $LOG_FILE
+curl -s $IP_VM:9200/_cat/health?v  >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
-curl -s $theIPaddress:9200/_cluster/health?pretty=true >> $LOG_FILE
+curl -s $IP_VM:9200/_cluster/health?pretty=true >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 echo "***CLUSTER-ALLOCATION***" >> $LOG_FILE
 echo >> $LOG_FILE
-curl -s -XGET $theIPaddress:9200/_cluster/allocation/explain?pretty >> $LOG_FILE
+curl -s -XGET $IP_VM:9200/_cluster/allocation/explain?pretty >> $LOG_FILE
 echo "=======================================================================================" >> $LOG_FILE
 
 
@@ -251,10 +331,150 @@ echo "==========================================================================
 echo "***RABBITMQ-QUEUES***" >> $LOG_FILE
 rabbitmqctl list_queues >> $LOG_FILE 
 echo "=======================================================================================" >> $LOG_FILE
+echo "***DATA-READER_LOG-INFO***" >> $LOG_FILE
+tail -50 /var/log/analytic/datareader.log  >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+echo "***MAX-SHARDS-INFO-DATA-READER-LOG***" >> $LOG_FILE
+cat /var/log/analytic/datareader.log | grep "maximum shards open" | sort | tail -15   >> $LOG_FILE
+echo "=======================================================================================" >> $LOG_FILE
+
+echo "***PARSE-ERRORS-INFO-DATA-READER-LOG***" >> $LOG_FILE
+cat /var/log/analytic/datareader.log | grep "failed to parse"  | sort | tail -25  >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+cat /var/log/analytic/datareader.log | grep -i "error" | grep -i "parse" | sort | tail -25 >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+
+awk '
+/mapper_parsing_exception/ {
+    block = $0 ORS;
+    for (i = 0; i < 5; i++) {
+        if (getline) block = block $0 ORS;
+        else break;
+    }
+    entries[++count] = block;
+}
+END {
+    start = (count > 5) ? count - 4 : 1;
+    for (i = start; i <= count; i++) print entries[i];
+}
+' /var/log/analytic/datareader.log >> $LOG_FILE
+
+
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+
+echo "=======================================================================================" >> $LOG_FILE
+
+
+echo "***TOTAL-SHARDS-INFO***" >> $LOG_FILE
+curl -s $IP_VM:9200/_cat/shards?v | wc -l  >> $LOG_FILE
+
+
+echo " =======================================================================================" >> $LOG_FILE
+
+echo "***UNASSIGNED-SHARD-INFO***" >> $LOG_FILE
+curl -s -XGET $IP_VM:9200/_cat/shards?h=index,shard,prirep,state,unassigned.reason| grep UNASSIGNED >> $LOG_FILE
+
+echo "=======================================================================================" >> $LOG_FILE
+echo "***RABBITMQ-LOG-INFO***" >> $LOG_FILE
+tail -50 /var/log/rabbitmq/rabbit@analytic.log >> $LOG_FILE
+
+echo "=======================================================================================" >> $LOG_FILE
+echo "***ELASTICSEARCH-GC-LOG-INFO***" >> $LOG_FILE
+tail -50 /var/log/elasticsearch/gc.log >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+echo "=======================================================================================" >> $LOG_FILE
+
+echo "***TOTAL-PERFORMANCES-INDICES ON THIS NODE***" >> $LOG_FILE
+curl -s -XGET $IP_VM:9200/_cat/indices/*performance-* | wc -l >> $LOG_FILE
+echo "=======================================================================================" >> $LOG_FILE
+
+
+echo "TOTAL stats-dialogic-performance-indices on this node" >> $LOG_FILE
+curl -s -XGET $IP_VM:9200/_cat/indices/stats-dialogic-performance-* | wc -l  >> $LOG_FILE
+echo "=======================================================================================" >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+echo "=======stats-dialogic-performance count for current year===============================" >> $LOG_FILE
+curl -s -XGET $IP_VM:9200/_cat/indices/stats-dialogic-performance-$YEAR* | wc -l  >> $LOG_FILE
+
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+echo "=======stats-dialogic-performance count from previous year==============================" >> $LOG_FILE
+curl -s -XGET $IP_VM:9200/_cat/indices/stats-dialogic-performance-$PREV_YEAR* | wc -l  >> $LOG_FILE
+
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+
+
+echo "TOTAL dialogic-performance-indices on this node" >> $LOG_FILE
+curl -s -XGET $IP_VM:9200/_cat/indices/dialogic-performance-* | wc -l >> $LOG_FILE
+echo "=======================================================================================" >> $LOG_FILE
+echo "=======dialogic-performance count for current year===============================" >> $LOG_FILE
+curl -s -XGET $IP_VM:9200/_cat/indices/dialogic-performance-$YEAR* | wc -l  >> $LOG_FILE
+
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+echo "=======dialogic-performance count from previous year==============================" >> $LOG_FILE
+curl -s -XGET $IP_VM:9200/_cat/indices/dialogic-performance-$PREV_YEAR* | wc -l  >> $LOG_FILE
+
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+
+
+echo "*TOTAL dialogic-sbc-indices on this node*" >> $LOG_FILE
+curl -s -XGET $IP_VM:9200/_cat/indices/dialogic-sbc-* | wc -l  >> $LOG_FILE
+echo "=======================================================================================" >> $LOG_FILE
+echo "=======dialogic-sbc-indices count for current year===============================" >> $LOG_FILE
+curl -s -XGET $IP_VM:9200/_cat/indices/dialogic-sbc-$YEAR* | wc -l  >> $LOG_FILE
+
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+echo "=======dialogic-sbc-indices count from previous year==============================" >> $LOG_FILE
+curl -s -XGET $IP_VM:9200/_cat/indices/dialogic-sbc-$PREV_YEAR* | wc -l  >> $LOG_FILE
 
 
 
 
+echo "=======================================================================================" >> $LOG_FILE
+echo "===============================dialogic-sbc==========================================" >> $LOG_FILE
+echo "=======================================================================================" >> $LOG_FILE
+curl -s -XGET $IP_VM:9200/_cat/indices/dialogic-sbc* | sort | head -10 >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+curl -s -XGET $IP_VM:9200/_cat/indices/dialogic-sbc* | sort | tail -10 >> $LOG_FILE
+
+echo "=======================================================================================" >> $LOG_FILE
+echo "===============================dialogic-performance==========================================" >> $LOG_FILE
+echo "=======================================================================================" >> $LOG_FILE
+curl -s -XGET $IP_VM:9200/_cat/indices/dialogic-performance* | sort | head -10  >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+curl -s -XGET $IP_VM:9200/_cat/indices/dialogic-performance* | sort | tail -10 >> $LOG_FILE
+
+
+
+
+echo "=======================================================================================" >> $LOG_FILE
+echo "===============================stats-dialogic-performance==========================================" >> $LOG_FILE
+echo "=======================================================================================" >> $LOG_FILE
+curl -s -XGET $IP_VM:9200/_cat/indices/stats-dialogic-performance* | sort | head -20  >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+curl -s -XGET $IP_VM:9200/_cat/indices/stats-dialogic-performance* | sort | tail -10 >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+
+
+
+echo "=======================================================================================" >> $LOG_FILE
+echo "=======================================================================================" >> $LOG_FILE
+echo "=======================================================================================" >> $LOG_FILE
+
+
+
+echo "===============================DIALOGIC-TEMPLATE==========================================" >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+curl -s -XGET $IP_VM:9200/_template/template_1?pretty=true >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+
+
+}
+
+network_details()
+{
+echo >> "$LOG_FILE"
+echo "9.NETWORK DETAILS" >> $LOG_FILE
 echo "=======================================================================================" >> $LOG_FILE
 
 echo "***NETWORK-STATS***" >> $LOG_FILE
@@ -307,177 +527,52 @@ cd /etc/sysconfig/network-scripts
 echo "*MGMT*" >> $LOG_FILE
 cat ifcfg-mgmt >> $LOG_FILE
 echo "=======================================================================================" >> $LOG_FILE
-
-echo "***SYSTEM-UPTIME-INFO***" >> $LOG_FILE
-uptime >> $LOG_FILE
-echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
-who -b >> $LOG_FILE
-echo "=======================================================================================" >> $LOG_FILE
-
-echo "***TIME-SYNC***" >> $LOG_FILE
-cat /etc/chrony.conf >> $LOG_FILE
-echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
-timedatectl status >> $LOG_FILE
-echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
-
-echo "***TIME-SOURCES-TRACKING***" >> $LOG_FILE
-chronyc sources >> $LOG_FILE
-echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
-chronyc tracking >> $LOG_FILE
-echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
-chronyc ntpdata >> $LOG_FILE
-echo "=======================================================================================" >> $LOG_FILE
-
-echo "***DATA-READER_LOG-INFO***" >> $LOG_FILE
-tail -50 /var/log/analytic/datareader.log  >> $LOG_FILE
-echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
-echo "***MAX-SHARDS-INFO-DATA-READER-LOG***" >> $LOG_FILE
-cat /var/log/analytic/datareader.log | grep "maximum shards open" | sort | tail -15   >> $LOG_FILE
-echo "=======================================================================================" >> $LOG_FILE
-
-echo "***PARSE-ERRORS-INFO-DATA-READER-LOG***" >> $LOG_FILE
-cat /var/log/analytic/datareader.log | grep "failed to parse"  | sort | tail -25  >> $LOG_FILE
-echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
-cat /var/log/analytic/datareader.log | grep -i "error" | grep -i "parse" | sort | tail -25 >> $LOG_FILE
-echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
-
-awk '
-/mapper_parsing_exception/ {
-    block = $0 ORS;
-    for (i = 0; i < 5; i++) {
-        if (getline) block = block $0 ORS;
-        else break;
-    }
-    entries[++count] = block;
 }
-END {
-    start = (count > 5) ? count - 4 : 1;
-    for (i = start; i <= count; i++) print entries[i];
-}
-' /var/log/analytic/datareader.log >> $LOG_FILE
-
-
-echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
-
-echo "=======================================================================================" >> $LOG_FILE
-
-
-echo "***TOTAL-SHARDS-INFO***" >> $LOG_FILE
-curl -s $theIPaddress:9200/_cat/shards?v | wc -l  >> $LOG_FILE
-
-
-echo " =======================================================================================" >> $LOG_FILE
-
-echo "***UNASSIGNED-SHARD-INFO***" >> $LOG_FILE
-curl -s -XGET $theIPaddress:9200/_cat/shards?h=index,shard,prirep,state,unassigned.reason| grep UNASSIGNED >> $LOG_FILE
-
-echo "=======================================================================================" >> $LOG_FILE
-echo "***RABBITMQ-LOG-INFO***" >> $LOG_FILE
-tail -50 /var/log/rabbitmq/rabbit@analytic.log >> $LOG_FILE
-
-echo "=======================================================================================" >> $LOG_FILE
-echo "***ELASTICSEARCH-GC-LOG-INFO***" >> $LOG_FILE
-tail -50 /var/log/elasticsearch/gc.log >> $LOG_FILE
-echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
-echo "=======================================================================================" >> $LOG_FILE
-
-echo "***TOTAL-PERFORMANCES-INDICES ON THIS NODE***" >> $LOG_FILE
-curl -s -XGET $theIPaddress:9200/_cat/indices/*performance-* | wc -l >> $LOG_FILE
-echo "=======================================================================================" >> $LOG_FILE
-
-
-echo "TOTAL stats-dialogic-performance-indices on this node" >> $LOG_FILE
-curl -s -XGET $theIPaddress:9200/_cat/indices/stats-dialogic-performance-* | wc -l  >> $LOG_FILE
-echo "=======================================================================================" >> $LOG_FILE
-echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
-echo "=======stats-dialogic-performance count for current year===============================" >> $LOG_FILE
-curl -s -XGET $theIPaddress:9200/_cat/indices/stats-dialogic-performance-$YEAR* | wc -l  >> $LOG_FILE
-
-echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
-echo "=======stats-dialogic-performance count from previous year==============================" >> $LOG_FILE
-curl -s -XGET $theIPaddress:9200/_cat/indices/stats-dialogic-performance-$PREV_YEAR* | wc -l  >> $LOG_FILE
-
-echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
-
-
-echo "TOTAL dialogic-performance-indices on this node" >> $LOG_FILE
-curl -s -XGET $theIPaddress:9200/_cat/indices/dialogic-performance-* | wc -l >> $LOG_FILE
-echo "=======================================================================================" >> $LOG_FILE
-echo "=======dialogic-performance count for current year===============================" >> $LOG_FILE
-curl -s -XGET $theIPaddress:9200/_cat/indices/dialogic-performance-$YEAR* | wc -l  >> $LOG_FILE
-
-echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
-echo "=======dialogic-performance count from previous year==============================" >> $LOG_FILE
-curl -s -XGET $theIPaddress:9200/_cat/indices/dialogic-performance-$PREV_YEAR* | wc -l  >> $LOG_FILE
-
-echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
-
-
-echo "*TOTAL dialogic-sbc-indices on this node*" >> $LOG_FILE
-curl -s -XGET $theIPaddress:9200/_cat/indices/dialogic-sbc-* | wc -l  >> $LOG_FILE
-echo "=======================================================================================" >> $LOG_FILE
-echo "=======dialogic-sbc-indices count for current year===============================" >> $LOG_FILE
-curl -s -XGET $theIPaddress:9200/_cat/indices/dialogic-sbc-$YEAR* | wc -l  >> $LOG_FILE
-
-echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
-echo "=======dialogic-sbc-indices count from previous year==============================" >> $LOG_FILE
-curl -s -XGET $theIPaddress:9200/_cat/indices/dialogic-sbc-$PREV_YEAR* | wc -l  >> $LOG_FILE
 
 
 
-
-echo "=======================================================================================" >> $LOG_FILE
-echo "===============================dialogic-sbc==========================================" >> $LOG_FILE
-echo "=======================================================================================" >> $LOG_FILE
-curl -s -XGET $theIPaddress:9200/_cat/indices/dialogic-sbc* | sort | head -10 >> $LOG_FILE
-echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
-curl -s -XGET $theIPaddress:9200/_cat/indices/dialogic-sbc* | sort | tail -10 >> $LOG_FILE
-
-echo "=======================================================================================" >> $LOG_FILE
-echo "===============================dialogic-performance==========================================" >> $LOG_FILE
-echo "=======================================================================================" >> $LOG_FILE
-curl -s -XGET $theIPaddress:9200/_cat/indices/dialogic-performance* | sort | head -10  >> $LOG_FILE
-echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
-curl -s -XGET $theIPaddress:9200/_cat/indices/dialogic-performance* | sort | tail -10 >> $LOG_FILE
-
-
-
-
-echo "=======================================================================================" >> $LOG_FILE
-echo "===============================stats-dialogic-performance==========================================" >> $LOG_FILE
-echo "=======================================================================================" >> $LOG_FILE
-curl -s -XGET $theIPaddress:9200/_cat/indices/stats-dialogic-performance* | sort | head -20  >> $LOG_FILE
-echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
-curl -s -XGET $theIPaddress:9200/_cat/indices/stats-dialogic-performance* | sort | tail -10 >> $LOG_FILE
-echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
-
-
-
-echo "=======================================================================================" >> $LOG_FILE
-echo "=======================================================================================" >> $LOG_FILE
-echo "=======================================================================================" >> $LOG_FILE
-
-
-
-echo "===============================DIALOGIC-TEMPLATE==========================================" >> $LOG_FILE
-echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
-curl -s -XGET $theIPaddress:9200/_template/template_1?pretty=true >> $LOG_FILE
-echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
-echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
-
-
+application_details()
+{
+echo >> "$LOG_FILE"
+echo "10.APPLICATION PACKAGES" >> $LOG_FILE
 echo "===============================APPLICATION_LIST==========================================" >> $LOG_FILE
 echo "***count of all installed packages***" >> $LOG_FILE
 yum list installed | wc -l >> $LOG_FILE
 echo "***all installed packages names***" >> $LOG_FILE
 yum list installed >> $LOG_FILE
+}
+
+
+
+#MAIN
+
+echo "=======================================================================================" > $LOG_FILE
+echo "***$CURRENT_TIMESTAMP - START OF LOG***" >> $LOG_FILE
+echo "=======================================================================================" >> $LOG_FILE
+echo | tee -a "$LOG_FILE"
+echo "Script running, please wait" 
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+echo "=======================================================================================" >> $LOG_FILE
+
+
+hardware_platform
+hardware_plat_details
+hardware_os
+cpu_memory_details
+timedate_info
+host_dns_info
+storage_info
+analytics_details
+network_details
+application_details
+
 
 clear
 
 
 chmod 755 $LOG_FILE
 
-mv $LOG_FILE /tmp/ANALYTICS_LOG_INFO-$HOST_NAME-$theSerial-$theIPaddress-$(date +"%Y_%m_%d_%I_%M_%p").log
+mv $LOG_FILE /tmp/ANALYTICS_LOG_INFO-$HOST_NAME-$theSerial-$IP_VM-$(date +"%Y_%m_%d_%I_%M_%p").log
 
 echo "This script has completed, please check /tmp folder for ANALYTICS_LOG_INFO-* log to send to support" 
 
