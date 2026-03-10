@@ -5,49 +5,29 @@ exec 2>/dev/null
 CURRENT_TIMESTAMP=$(date)
 HOST_NAME=$(hostname)
 theSerial=$(dmidecode -t system | grep Serial | awk '{print $3}')
-IP_VM=$(ip addr show eth0 | grep "inet\b" | awk '{print $2}' | cut -d/ -f1 | head -n1)
-IP_HW=$(ip addr show mgmt | grep "inet\b" | awk '{print $2}' | cut -d/ -f1 | head -n1)
+theIPaddressVM=$(ip addr show eth0 | grep "inet\b" | awk '{print $2}' | cut -d/ -f1 | head -n1)
+theIPaddressHW=$(ip addr show mgmt | grep "inet\b" | awk '{print $2}' | cut -d/ -f1 | head -n1)
 
 
 LOG_FILE=/tmp/SBC_LOG_INFO-$HOST_NAME.log
 
-hardware_platform()
-{
-
-echo >> "$LOG_FILE"
-echo "=======================================================================================" >> "$LOG_FILE"
-echo "Date: $CURRENT_TIMESTAMP" >> "$LOG_FILE"
-echo "Hostname: $HOST_NAME" >> "$LOG_FILE"
-echo "VM MGMT IP: $IP_VM" >> "$LOG_FILE"
-echo "HP Mgmt IP: $IP_HW" >> "$LOG_FILE"
+clear
+echo "=======================================================================================" > $LOG_FILE
+echo "***$CURRENT_TIMESTAMP - START OF LOG***" >> $LOG_FILE
+echo "=======================================================================================" >> $LOG_FILE
+echo | tee -a "$LOG_FILE"
+echo "Script running, please wait" 
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
-echo "HW/VM -SBC-License-Platform-Details" >> $LOG_FILE
-dmidecode -t system | grep Manufacturer >> $LOG_FILE
-dmidecode -t system | grep Product >> $LOG_FILE
-dmidecode -t system | grep Serial >> $LOG_FILE
-dmidecode -t system | grep UUID >> $LOG_FILE
+echo "Hostname of this server is $HOST_NAME" >> $LOG_FILE
+echo "=======================================================================================" >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
-cat /opt/bnet/release_info >> $LOG_FILE
-echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
-/opt/bnet/scripts/getVMVSystemInfo >> $LOG_FILE
-echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+echo "IP Address of this server is $theIPaddressVM-$theIPaddressHW" >> $LOG_FILE
+echo "=======================================================================================" >> $LOG_FILE
+echo >> $LOG_FILE
 /opt/bnet/scripts/swMgr Summary >> $LOG_FILE
-echo >> "$LOG_FILE"
+echo >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 
-/opt/bnet/bin/bnetscs -ver >> $LOG_FILE
-
-echo >> "$LOG_FILE"
-echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
-
-echo >> "$LOG_FILE"
-
-}
-
-
-hardware_plat_details()
-
-{
 echo "***-HARDWARE-PLATFORM-INFORMATION***" >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 
@@ -70,12 +50,128 @@ echo "--------------------------------------------------------------------------
 echo "=======================================================================================" >> $LOG_FILE
 echo "=======================================================================================" >> $LOG_FILE
 
-}
+
+echo "***Full summary of available and used disk space usage of the file system***" >> $LOG_FILE
+df -h >> $LOG_FILE
+echo "=======================================================================================" >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+echo "***STORAGE-INFO***" >> $LOG_FILE
+du -sh /archive/software/ >> $LOG_FILE
+du -sh /cores >> $LOG_FILE
+du -sh /var/crash/ >> $LOG_FILE
+du -sh /eventdata/ >> $LOG_FILE
+du -sh /archive/backup/config >> $LOG_FILE
+du -sh /archive/SIP_capture >> $LOG_FILE
+du -sh /archive/Trace_captures >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+
+du -h / --exclude=/proc --exclude=/sys --exclude=/dev --exclude=/run --max-depth=1 | sort -rh | head -20 >> $LOG_FILE
 
 
-hardware_os()
+echo "=======================================================================================" >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+top -b -o %MEM | head -n 16 >> $LOG_FILE
+echo "=======================================================================================" >> $LOG_FILE
 
-{
+echo "***CPU-PRINTOUT***" >> $LOG_FILE
+top -b -o %CPU | head -n 16 >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+cat /proc/kbnet/cpu_usage >> $LOG_FILE
+echo "=======================================================================================" >> $LOG_FILE
+
+echo "=======================================================================================" >> $LOG_FILE
+echo "***SYSTEM-UPTIME-INFO***" >> $LOG_FILE
+uptime >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+echo "***Time Of Last System Boot***" >> $LOG_FILE
+who -b >> $LOG_FILE
+echo "=======================================================================================" >> $LOG_FILE
+
+echo "***System Reboots***" >> $LOG_FILE
+last reboot >> $LOG_FILE
+echo "=======================================================================================" >> $LOG_FILE
+
+
+
+
+echo "***-SBC-PLATFORM-INFORMATION***" >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+
+echo "*** HW/VM -SBC-License-Platform-Details***" >> $LOG_FILE
+
+dmidecode -t system | grep Manufacturer >> $LOG_FILE
+dmidecode -t system | grep Product >> $LOG_FILE
+dmidecode -t system | grep Serial >> $LOG_FILE
+dmidecode -t system | grep UUID >> $LOG_FILE
+echo "=======================================================================================" >> $LOG_FILE
+
+echo "*NETWORK INTERFACE PRINT*" >> $LOG_FILE
+
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+cd /etc/sysconfig/network-scripts
+ls -ltrh >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+echo "*HA-HW*" >> $LOG_FILE
+cat /etc/sysconfig/network-scripts/ifcfg-ha | grep "DEVICE\|NAME">> $LOG_FILE
+cat /etc/sysconfig/network-scripts/ifcfg-ha | grep "HWADDR\|MACADDR" >> $LOG_FILE
+echo "*MGMT-HW*" >> $LOG_FILE
+cat /etc/sysconfig/network-scripts/ifcfg-mgmt | grep "DEVICE\|NAME" >> $LOG_FILE
+cat /etc/sysconfig/network-scripts/ifcfg-mgmt | grep "HWADDR\|MACADDR" >> $LOG_FILE
+echo "=======================================================================================" >> $LOG_FILE
+echo "=======================================================================================" >> $LOG_FILE
+
+
+
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+echo "*HA-VM*" >> $LOG_FILE
+cat /etc/sysconfig/network-scripts/ifcfg-eth1| grep "DEVICE\|NAME" >> $LOG_FILE
+cat /etc/sysconfig/network-scripts/ifcfg-eth1 | grep "HWADDR\|MACADDR" >> $LOG_FILE
+echo "*MGMT-VM*" >> $LOG_FILE
+cat /etc/sysconfig/network-scripts/ifcfg-eth0 | grep "DEVICE\|NAME" >> $LOG_FILE
+cat /etc/sysconfig/network-scripts/ifcfg-eth0 | grep "HWADDR\|MACADDR" >> $LOG_FILE
+echo "=======================================================================================" >> $LOG_FILE
+
+echo >> $LOG_FILE
+echo "*NMCLI DEVICE STATUS" >> $LOG_FILE
+nmcli device status >> $LOG_FILE
+echo >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+
+echo >> $LOG_FILE
+echo "*NMCLI CONNECTION" >> $LOG_FILE
+nmcli connection >> $LOG_FILE
+echo >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+
+echo "=======================================================================================" >> $LOG_FILE
+
+
+
+
+
+echo "***PLATFORM & PRODUCT***" >> $LOG_FILE
+cat /opt/bnet/release_info >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+echo >> $LOG_FILE
+/opt/BNSwMgr/swMgr DeploymentType  >> $LOG_FILE
+echo >> $LOG_FILE
+echo "=======================================================================================" >> $LOG_FILE
+
+echo "***VM-SYSTEM-INFO***" >> $LOG_FILE
+/opt/bnet/scripts/getVMVSystemInfo >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+echo "***COT-SYSTEM-INFO***" >> $LOG_FILE
+dmidecode -t system >> $LOG_FILE
+echo "=======================================================================================" >> $LOG_FILE
+
+echo "***SOFTWARE-INFORMATION***" >> $LOG_FILE
+cd /opt/bnet/bin/
+./bnetscs -ver >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+
 cd /opt/bnet
 ls -ltrh >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
@@ -103,110 +199,6 @@ echo "***KEXEC-VERSION***" >> $LOG_FILE
 rpm -qa | grep kexec >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 echo "=======================================================================================" >> $LOG_FILE
-}
-
-
-
-
-cpu_memory_details()
-
-{
-
-echo "=======================================================================================" >> $LOG_FILE
-echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
-echo "***MEMORY-PRINTOUT***" >> $LOG_FILE
-top -b -o %MEM | head -n 16 >> $LOG_FILE
-echo "=======================================================================================" >> $LOG_FILE
-
-echo "***CPU-PRINTOUT***" >> $LOG_FILE
-top -b -o %CPU | head -n 16 >> $LOG_FILE
-echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
-cat /proc/kbnet/cpu_usage >> $LOG_FILE
-echo "=======================================================================================" >> $LOG_FILE
-
-echo "=======================================================================================" >> $LOG_FILE
-echo "***SYSTEM-UPTIME-INFO***" >> $LOG_FILE
-uptime >> $LOG_FILE
-echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
-echo "***Time Of Last System Boot***" >> $LOG_FILE
-who -b >> $LOG_FILE
-echo "=======================================================================================" >> $LOG_FILE
-
-echo "***System Reboots***" >> $LOG_FILE
-last reboot >> $LOG_FILE
-echo "=======================================================================================" >> $LOG_FILE
-
-}
-
-
-
-timedate_info ()
-{
-echo "=======================================================================================" >> $LOG_FILE
-echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
-echo "***TIME-SYNC***" >> $LOG_FILE
-echo >> "$LOG_FILE"
-timedatectl status >> $LOG_FILE
-echo >> "$LOG_FILE"
-echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
-cat /etc/chrony.conf >> $LOG_FILE
-echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
-
-echo "***TIME-SOURCES-TRACKING***" >> $LOG_FILE
-echo >> "$LOG_FILE"
-chronyc sources >> $LOG_FILE
-echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
-chronyc tracking >> $LOG_FILE
-echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
-chronyc ntpdata >> $LOG_FILE
-echo "=======================================================================================" >> $LOG_FILE
-}
-
-
-host_dns_info()
-
-{
-echo "***HOST-INFO***" >> $LOG_FILE
-cd /etc
-cat hostname >> $LOG_FILE
-echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
-cat hosts >> $LOG_FILE
-echo "=======================================================================================" >> $LOG_FILE
-
-echo "***DNS-INFO***" >> $LOG_FILE
-cd /etc
-cat resolv.conf >> $LOG_FILE
-echo "=======================================================================================" >> $LOG_FILE
-}
-
-
-storage_info ()
-
-{
-
-echo "***Full summary of available and used disk space usage of the file system***" >> $LOG_FILE
-df -h >> $LOG_FILE
-echo "=======================================================================================" >> $LOG_FILE
-echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
-echo "***STORAGE-INFO***" >> $LOG_FILE
-du -sh /archive/software/ >> $LOG_FILE
-du -sh /cores >> $LOG_FILE
-du -sh /var/crash/ >> $LOG_FILE
-du -sh /eventdata/ >> $LOG_FILE
-du -sh /archive/backup/config >> $LOG_FILE
-du -sh /archive/SIP_capture >> $LOG_FILE
-du -sh /archive/Trace_captures >> $LOG_FILE
-echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
-
-du -h / --exclude=/proc --exclude=/sys --exclude=/dev --exclude=/run --max-depth=1 | sort -rh | head -20 >> $LOG_FILE
-}
-
-
-
-
-sbc_details ()
-{
-echo "=======================================================================================" >> $LOG_FILE
 
 
 
@@ -221,7 +213,7 @@ echo "***CURRENT-MIB-DIRECTORY-PRINT***" >> $LOG_FILE
 cd /config/mibs/current  
 git branch -v >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
-git log --pretty="%h, %ar : %s" -5 >> $LOG_FILE
+git log --pretty="%h, %ar : %s" -2 >> $LOG_FILE
 
 echo "=======================================================================================" >> $LOG_FILE
 
@@ -257,6 +249,17 @@ ls -ltrh >> $LOG_FILE
 echo "=======================================================================================" >> $LOG_FILE
 
 
+echo "***HOST-INFO***" >> $LOG_FILE
+cd /etc
+cat hostname >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+cat hosts >> $LOG_FILE
+echo "=======================================================================================" >> $LOG_FILE
+
+echo "***DNS-INFO***" >> $LOG_FILE
+cd /etc
+cat resolv.conf >> $LOG_FILE
+echo "=======================================================================================" >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 echo "***CRONTAB-ENTRIES***" >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
@@ -288,6 +291,10 @@ echo "--------------------------------------------------------------------------
 grep SLEEP /archive/logger/*/bnett* >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 echo " =======================================================================================" >> $LOG_FILE
+
+
+
+
 
 
 
@@ -340,6 +347,22 @@ echo "--------------------------------------------------------------------------
 echo "***SDRs-ANALYTICS***" >> $LOG_FILE
 cd /eventdata/analytic
 ls -1 | wc -l >> $LOG_FILE
+
+echo "=======================================================================================" >> $LOG_FILE
+
+echo "***TIME-SYNC***" >> $LOG_FILE
+cat /etc/chrony.conf >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+timedatectl status >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+
+echo "***TIME-SOURCES-TRACKING***" >> $LOG_FILE
+chronyc sources >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+chronyc tracking >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+chronyc ntpdata >> $LOG_FILE
+echo "=======================================================================================" >> $LOG_FILE
 
 
 
@@ -692,56 +715,6 @@ echo "==========================================================================
 
 echo "=======================================================================================" >> $LOG_FILE
 
-}
-
-
-network_details()
-{
-
-echo "*NETWORK INTERFACE PRINT*" >> $LOG_FILE
-
-echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
-cd /etc/sysconfig/network-scripts
-ls -ltrh >> $LOG_FILE
-echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
-
-echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
-echo "*HA-HW*" >> $LOG_FILE
-cat /etc/sysconfig/network-scripts/ifcfg-ha | grep "DEVICE\|NAME">> $LOG_FILE
-cat /etc/sysconfig/network-scripts/ifcfg-ha | grep "HWADDR\|MACADDR" >> $LOG_FILE
-echo "*MGMT-HW*" >> $LOG_FILE
-cat /etc/sysconfig/network-scripts/ifcfg-mgmt | grep "DEVICE\|NAME" >> $LOG_FILE
-cat /etc/sysconfig/network-scripts/ifcfg-mgmt | grep "HWADDR\|MACADDR" >> $LOG_FILE
-echo "=======================================================================================" >> $LOG_FILE
-echo "=======================================================================================" >> $LOG_FILE
-
-
-
-echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
-echo "*HA-VM*" >> $LOG_FILE
-cat /etc/sysconfig/network-scripts/ifcfg-eth1| grep "DEVICE\|NAME" >> $LOG_FILE
-cat /etc/sysconfig/network-scripts/ifcfg-eth1 | grep "HWADDR\|MACADDR" >> $LOG_FILE
-echo "*MGMT-VM*" >> $LOG_FILE
-cat /etc/sysconfig/network-scripts/ifcfg-eth0 | grep "DEVICE\|NAME" >> $LOG_FILE
-cat /etc/sysconfig/network-scripts/ifcfg-eth0 | grep "HWADDR\|MACADDR" >> $LOG_FILE
-echo "=======================================================================================" >> $LOG_FILE
-
-echo >> $LOG_FILE
-echo "*NMCLI DEVICE STATUS" >> $LOG_FILE
-nmcli device status >> $LOG_FILE
-echo >> $LOG_FILE
-echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
-
-echo >> $LOG_FILE
-echo "*NMCLI CONNECTION" >> $LOG_FILE
-nmcli connection >> $LOG_FILE
-echo >> $LOG_FILE
-echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
-
-echo "=======================================================================================" >> $LOG_FILE
-
-echo "=======================================================================================" >> $LOG_FILE
-
 echo "***NETWORK-STATS***" >> $LOG_FILE
 ip address >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
@@ -873,30 +846,7 @@ echo "--------------------------------------------------------------------------
 echo "=======================================================================================" >> $LOG_FILE
 echo "=======================================================================================" >> $LOG_FILE
 
-}
 
-
-
-
-#MAIN
-
-clear
-echo "=======================================================================================" > $LOG_FILE
-echo "***$CURRENT_TIMESTAMP - START OF LOG***" >> $LOG_FILE
-echo "=======================================================================================" >> $LOG_FILE
-echo | tee -a "$LOG_FILE"
-echo "Script running, please wait" 
-echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
-
-hardware_platform
-hardware_plat_details
-hardware_os
-cpu_memory_details
-timedate_info
-host_dns_info
-storage_info
-sbc_details
-network_details
 
 clear
 echo | tee -a "$LOG_FILE"
@@ -904,16 +854,8 @@ echo | tee -a "$LOG_FILE"
 
 chmod 755 $LOG_FILE
 
-mv $LOG_FILE /tmp/SBC_LOG_INFO-$HOST_NAME-$theSerial-$IP_VM-$IP_HW-$(date +"%Y_%m_%d_%I_%M_%p").log
+mv $LOG_FILE /tmp/SBC_LOG_INFO-$HOST_NAME-$theSerial-$theIPaddressVM-$theIPaddressHW-$(date +"%Y_%m_%d_%I_%M_%p").log
 
 echo "This script has completed, please check /tmp folder for SBC_LOG_INFO-* log to send to support" 
 
 exit 0;
-
-
-
-
-
-
-
-
