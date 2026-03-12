@@ -49,10 +49,9 @@ commands_diagmgr=(
 "dump algcounts"
 "show flowcounts"
 "dump total"
-"dump sessions"
+"dump longdurationcalls"
 "dump mem"
 "dump rvstat"
-"dump cache"
 "dump systemstats"
 "exit"
 )
