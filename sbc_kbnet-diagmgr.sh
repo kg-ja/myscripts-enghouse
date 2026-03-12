@@ -102,6 +102,6 @@ echo "==========================================================================
 echo >> "$LOG_FILE"
 echo >> "$LOG_FILE"
 
-mv "$LOG_FILE" /tmp/sbc_$HOST_NAME-kbnet-diamgr_output-$SERIAL-$IP_VM-$IP_HW-$(date +"%Y_%m_%d_%I_%M_%p").log
+mv "$LOG_FILE" /tmp/sbc_kbnet-diamgr_output-$HOST_NAME-$SERIAL-$IP_VM-$IP_HW-$(date +"%Y_%m_%d_%I_%M_%p").log
 
 exit 0
