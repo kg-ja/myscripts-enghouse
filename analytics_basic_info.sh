@@ -538,6 +538,7 @@ echo "10.APPLICATION PACKAGES" >> $LOG_FILE
 echo "===============================APPLICATION_LIST==========================================" >> $LOG_FILE
 echo "***count of all installed packages***" >> $LOG_FILE
 yum list installed | wc -l >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 echo "***all installed packages names***" >> $LOG_FILE
 yum list installed >> $LOG_FILE
 }
