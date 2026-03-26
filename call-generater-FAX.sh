@@ -33,7 +33,8 @@ SBC2UASIPPort=5060
 
 
 
-LOG_FILE=/tmp/SIPp_CALLS_LOG_INFO-$HOST_NAME.log
+
+LOG_FILE=/tmp/SIPp_FAX-CALL-$HOST_NAME.log
 
 
 
@@ -235,14 +236,6 @@ kill_sipp
 
 basic_data
 
-uac_to_uas_call
-
-kill_sipp
-
-uas_to_uac_call
-
-kill_sipp
-
 uac_to_uas_fax
 
 kill_sipp
@@ -251,6 +244,6 @@ kill_sipp
 
 chmod 755 $LOG_FILE
 
-mv $LOG_FILE /tmp/SIPp_CALLS_LOG_INFO-$HOST_NAME-$(date +"%Y_%m_%d_%I_%M_%p").log
+mv $LOG_FILE /tmp/SIPp_FAX-CALL-$HOST_NAME-$(date +"%Y_%m_%d_%I_%M_%p").log
 
 exit 0;

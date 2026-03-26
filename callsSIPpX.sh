@@ -20,11 +20,17 @@ uassserverIP=10.61.13.183
 uassserverPort=5060
 
 SBC1UACIP=10.61.13.202
+SBC1UACIPPort=5060
+
 SBC2UACIP=10.61.13.204
+SBC2UACIPPort=5060
 
 
 SBC1UASIP=10.61.13.160
+SBC1UASIPPort=5060
+
 SBC2UASIP=10.61.13.172
+SBC2UASIPPort=5060
 
 LOG_FILE=/tmp/SIPp_CALLS-$HOST_NAME.log
 
@@ -63,12 +69,12 @@ echo "===The-PID-for-SIpp-is-$PID ===" >> $LOG_FILE
 
 echo "===SIPp-CALLING-SBC28-$SBC1UACIP===" >> $LOG_FILE
 
-./sipp -i $uacserverIP -p $uacserverPort -sf uac_usercalls.xml -nr -m 10 -inf usercalls200.csv -d 55000 -l 15 $SBC1UACIP:5060
+./sipp -i $uacserverIP -p $uacserverPort -sf uac_usercalls.xml -nr -m 10 -inf usercalls200.csv -d 55000 -l 15 $SBC1UACIP:$SBC1UACIPPort
 
 
 sleep 5
 
-./sipp -i $uacserverIP -p $uacserverPort -sf uac_usercalls-emergency.xml -nr -m 8 -inf usercalls13-emergency.csv -d 10000 -l 5 $SBC1UACIP:5060
+./sipp -i $uacserverIP -p $uacserverPort -sf uac_usercalls-emergency.xml -nr -m 8 -inf usercalls13-emergency.csv -d 10000 -l 5 $SBC1UACIP:$SBC1UACIPPort
 
 
 sleep 5
@@ -76,12 +82,12 @@ sleep 5
 
 echo "===SIPp-CALLING-SBC53-$SBC2UACIP===" >> $LOG_FILE
 
-./sipp -i $uacserverIP -p $uacserverPort -sf uac_usercalls.xml -nr -m 5 -inf usercalls200.csv -d 75000 -l 15 $SBC2UACIP:5060
+./sipp -i $uacserverIP -p $uacserverPort -sf uac_usercalls.xml -nr -m 5 -inf usercalls200.csv -d 75000 -l 15 $SBC2UACIP:$SBC2UACIPPort
 
 
 sleep 5
 
-./sipp -i $uacserverIP -p $uacserverPort -sf uac_usercalls-emergency.xml -nr -m 8 -inf usercalls13-emergency.csv -d 10000 -l 5 $SBC2UACIP:5060
+./sipp -i $uacserverIP -p $uacserverPort -sf uac_usercalls-emergency.xml -nr -m 8 -inf usercalls13-emergency.csv -d 10000 -l 5 $SBC2UACIP:$SBC2UACIPPort
 
 
 sleep 5
@@ -111,12 +117,12 @@ echo "===The-PID-for-SIpp-is-$PID ===" >> $LOG_FILE
 
 echo "===SIPp-CALLING-SBC28-$SBC1UASIP===" >> $LOG_FILE
 
-./sipp -i $uassserverIP -p $uassserverPort -sf uac_usercalls.xml -nr -m 15 -inf usercalls200.csv -d 55000 -l 15 $SBC1UASIP:5060
+./sipp -i $uassserverIP -p $uassserverPort -sf uac_usercalls.xml -nr -m 15 -inf usercalls200.csv -d 55000 -l 15 $SBC1UASIP:$SBC1UASIPPort
 
 
 sleep 5
 
-./sipp -i $uassserverIP -p $uassserverPort -sf uac_usercalls-emergency.xml -nr -m 8 -inf usercalls13-emergency.csv -d 10000 -l 5 $SBC1UASIP:5060
+./sipp -i $uassserverIP -p $uassserverPort -sf uac_usercalls-emergency.xml -nr -m 8 -inf usercalls13-emergency.csv -d 10000 -l 5 $SBC1UASIP:$SBC1UASIPPort
 
 
 sleep 5
@@ -124,12 +130,12 @@ sleep 5
 
 echo "===SIPp-CALLING-SBC53-$SBC2UASIP===" >> $LOG_FILE
 
-./sipp -i $uassserverIP -p $uassserverPort -sf uac_usercalls.xml -nr -m 15 -inf usercalls200.csv -d 75000 -l 15 $SBC2UASIP:5060
+./sipp -i $uassserverIP -p $uassserverPort -sf uac_usercalls.xml -nr -m 15 -inf usercalls200.csv -d 75000 -l 15 $SBC2UASIP:$SBC2UASIPPort
 
 
 sleep 5
 
-./sipp -i $uassserverIP -p $uassserverPort -sf uac_usercalls-emergency.xml -nr -m 8 -inf usercalls13-emergency.csv -d 10000 -l 5 $SBC2UASIP:5060
+./sipp -i $uassserverIP -p $uassserverPort -sf uac_usercalls-emergency.xml -nr -m 8 -inf usercalls13-emergency.csv -d 10000 -l 5 $SBC2UASIP:$SBC2UASIPPort
 
 
 sleep 5
