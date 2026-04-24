@@ -6,7 +6,7 @@ SERIAL=$(dmidecode -t system | awk '/Serial/ {print $3}')
 IP_VM=$(ip -4 addr show eth0 2>/dev/null | awk '/inet / {print $2}' | cut -d/ -f1 | head -n1)
 IP_HW=$(ip -4 addr show mgmt 2>/dev/null | awk '/inet / {print $2}' | cut -d/ -f1 | head -n1)
 
-LOG_FILE=/tmp/sbc_$HOST_NAME-kbnet_output.txt
+LOG_FILE=/tmp/sbc_$HOST_NAME-$SERIAL-$IP_VM-$IP_HW-kbnet_output.txt
 CMD=/opt/bnet/tools/kbnetcmd
 
 touch "$LOG_FILE"
@@ -45,6 +45,12 @@ commands=(
 "1"
 "0"
 )
+
+
+echo "================" >> "$LOG_FILE"
+echo "KBNET PRINTOUT" >> "$LOG_FILE"
+echo "===============" >> "$LOG_FILE"
+echo >> "$LOG_FILE"
 
 (
 sleep 3

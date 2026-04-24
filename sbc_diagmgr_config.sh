@@ -6,7 +6,7 @@ SERIAL=$(dmidecode -t system | awk '/Serial/ {print $3}')
 IP_VM=$(ip -4 addr show eth0 2>/dev/null | awk '/inet / {print $2}' | cut -d/ -f1 | head -n1)
 IP_HW=$(ip -4 addr show mgmt 2>/dev/null | awk '/inet / {print $2}' | cut -d/ -f1 | head -n1)
 
-LOG_FILE=/tmp/sbc_$HOST_NAME-$SERIAL-$IP_VM-$IP_HW-diagmgr_output.txt
+LOG_FILE=/tmp/sbc_$HOST_NAME-$SERIAL-$IP_VM-$IP_HW-diagmgr_config_output.txt
 CMD=/opt/bnet/tools/rundiagmgr
 
 touch "$LOG_FILE"
@@ -37,12 +37,11 @@ echo >> "$LOG_FILE"
 commands=(
 "aetype SCS"
 "cd SIP"
-"dump algcounts"
-"show flowcounts"
-"dump total"
+"dump allinterfaces"
+"dump allpeers"
+"dump ipassoc "
 "dump mem"
 "dump rvstat"
-"dump cache"
 "exit"
 )
 

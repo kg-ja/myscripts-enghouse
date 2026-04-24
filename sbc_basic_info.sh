@@ -501,16 +501,82 @@ grep -i "peers/sip" /archive/logger/*/bnetscs_*  | grep -v "Info"  | tail -30  >
 
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 
+echo " Amount of UnconfiguredPeer Entries:" >> $LOG_FILE
+
+grep -i "UnconfiguredPeer" /archive/logger/*/bnetscs_*  | grep -v "Info"  | wc -l >> $LOG_FILE
+
+echo >> $LOG_FILE
+echo >> $LOG_FILE
+
+echo " Unconfigured Peer:" >> $LOG_FILE
+echo >> $LOG_FILE
+
+grep 'UnconfiguredPeer' /archive/logger/*/bnetscs_* | tail -15 >> $LOG_FILE
+echo >> $LOG_FILE
+
+
+
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 
 
+echo >> $LOG_FILE
+
+echo " Amount of SipGatewayRvSipStack MSGBUILDER Entries:" >> $LOG_FILE
+
+
+grep -i 'SipGatewayRvSipStack' /archive/logger/*/bnetscs_*  | grep 'MSGBUILDER' | wc -l >> $LOG_FILE
+echo >> $LOG_FILE
+echo >> $LOG_FILE
+
+grep 'SipGatewayRvSipStack' /archive/logger/*/bnetscs_*  | grep 'MSGBUILDER'  | tail -10 >> $LOG_FILE
+
+echo >> $LOG_FILE
+
+
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+
+echo >> $LOG_FILE
+
+echo " Amount of Bad pointer\|RA_Alloc Entries:" >> $LOG_FILE
+
+
+grep -i "Bad pointer\|RA_Alloc" /archive/logger/*/bnetscs_* | wc -l >> $LOG_FILE
+
+echo >> $LOG_FILE
+echo >> $LOG_FILE
 
 grep -i "Bad pointer\|RA_Alloc" /archive/logger/*/bnetscs_* | tail -10 >> $LOG_FILE
 
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 
+echo " Amount of SDP Parse Error Entries:" >> $LOG_FILE
+
+grep -i "SDP Parse Error" /archive/logger/*/bnetscs_* | wc -l >> $LOG_FILE
+
+echo >> $LOG_FILE
+echo >> $LOG_FILE
+
+echo " SDP Parse Error:" >> $LOG_FILE
+echo >> $LOG_FILE
+
+grep -i "SDP Parse Error" /archive/logger/*/bnetscs_*  | tail -15 >> $LOG_FILE
+echo >> $LOG_FILE
+
+
+
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+
 grep -i BINDTODEVICE /archive/logger/*/bnetscs_* | tail -10 >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+
+
+echo " Amount of Resource limit Entries:" >> $LOG_FILE
+
+
+grep -i "Resource limit" /archive/logger/*/bnetscs_* | wc -l >> $LOG_FILE
+
+echo >> $LOG_FILE
+echo >> $LOG_FILE
 
 grep -i "Resource limit" /archive/logger/*/bnetscs_* | tail -10 >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
