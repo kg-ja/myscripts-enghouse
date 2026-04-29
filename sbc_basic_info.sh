@@ -423,7 +423,19 @@ echo "--------------------------------------------------------------------------
 
 echo "***BNETSCS-HOST-RESOLVING_ERROR***" >> $LOG_FILE
 
-cat /archive/logger/*/bnetscs* | grep "can not resolve host"  | tail -10 >> $LOG_FILE
+echo >> $LOG_FILE
+
+echo " Amount of RESOLVER Entries:" >> $LOG_FILE
+
+
+grep -iE 'resolve host|ResolverDnsResolveIpByHost|RESOLVER' /archive/logger/*/bnetscs_* | wc -l >> $LOG_FILE
+
+echo >> $LOG_FILE
+echo >> $LOG_FILE
+
+cat /archive/logger/*/bnetscs* | grep -iE 'resolve host|ResolverDnsResolveIpByHost|RESOLVER' | tail -10 >> $LOG_FILE
+
+
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 cat /archive/logger/*/bnetscs* | grep "ERROR  - RESOLVER" | grep host  | tail -10 >> $LOG_FILE
 

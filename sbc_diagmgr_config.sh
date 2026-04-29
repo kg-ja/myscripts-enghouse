@@ -40,6 +40,7 @@ commands=(
 "dump allinterfaces"
 "dump allpeers"
 "dump ipassoc "
+"dump acl"
 "dump mem"
 "dump rvstat"
 "exit"
