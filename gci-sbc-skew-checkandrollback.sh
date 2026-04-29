@@ -202,7 +202,7 @@ fi
 
 
 
-# Main loop, will check if skew is set and remove
+# Main loop, will check if skew is set and correct if not
 get_server_info    
 os_find
 skew_check

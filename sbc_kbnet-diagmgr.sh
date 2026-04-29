@@ -33,7 +33,9 @@ echo "--------------------------------------------------------------------------
 /opt/bnet/scripts/swMgr Summary >> "$LOG_FILE"
 echo >> "$LOG_FILE"
 echo "---------------------------------------------------------------------------------------" >> "$LOG_FILE"
+echo "transport type of 6 is tcp  17 is udp   https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml" >> "$LOG_FILE"
 echo >> "$LOG_FILE"
+echo "---------------------------------------------------------------------------------------" >> "$LOG_FILE"
 
 commands_kbnet=(
 "134"
@@ -53,6 +55,10 @@ commands_diagmgr=(
 "dump mem"
 "dump rvstat"
 "dump systemstats"
+"dump allinterfaces"
+"dump allpeers"
+"dump ipassoc"
+"dump acl"
 "exit"
 )
 
@@ -101,6 +107,6 @@ echo "==========================================================================
 echo >> "$LOG_FILE"
 echo >> "$LOG_FILE"
 
-mv "$LOG_FILE" /tmp/sbc_kbnet-diamgr_output-$HOST_NAME-$SERIAL-$IP_VM-$IP_HW-$(date +"%Y_%m_%d_%I_%M_%p").log
+mv "$LOG_FILE" /tmp/sbc_kbnet-diamgr-$HOST_NAME-$SERIAL-$IP_VM-$IP_HW-$(date +"%Y_%m_%d_%I_%M_%p").log
 
 exit 0
