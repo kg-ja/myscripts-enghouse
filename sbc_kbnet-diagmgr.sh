@@ -58,7 +58,11 @@ commands_diagmgr=(
 "dump allinterfaces"
 "dump allpeers"
 "dump ipassoc"
+"dump association"
+"dump localdns"
 "dump acl"
+"dump mem"
+"dump rvstat"
 "exit"
 )
 
