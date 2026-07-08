@@ -159,7 +159,7 @@ echo "==========================================================================
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 
 echo "***CPU-INFO***" >> $LOG_FILE
-lscpu >> $LOG_FILE
+lscpu | grep -E '^(Architecture|CPU\(s\)|Vendor ID|Model name|Stepping|CPU MHz|BogoMIPS|Hypervisor vendor|Virtualization type):' >> $LOG_FILE
 
 echo "=======================================================================================" >> $LOG_FILE
 echo "***MEMORY-PRINTOUT***" >> $LOG_FILE
