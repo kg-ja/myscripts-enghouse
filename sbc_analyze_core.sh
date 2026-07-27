@@ -21,6 +21,12 @@ IP_HW=$(ip -4 addr show mgmt 2>/dev/null | awk '/inet / {print $2}' | cut -d/ -f
 
 set -euo pipefail
 
+
+if [[ $EUID -ne 0 ]]; then
+    echo "This script must be run as root"
+    exit 1
+fi
+
 #########################################
 # Configuration
 #########################################

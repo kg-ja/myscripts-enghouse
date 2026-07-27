@@ -9,7 +9,16 @@ IP_VM=$(ip addr show eth0 | grep "inet\b" | awk '{print $2}' | cut -d/ -f1 | hea
 IP_HW=$(ip addr show mgmt | grep "inet\b" | awk '{print $2}' | cut -d/ -f1 | head -n1)
 
 
-LOG_FILE=/tmp/SBC_LOG_INFO-$HOST_NAME.log
+LOG_FILE=/tmp/SBC_LOG_INFO-$HOST_NAME-$theSerial-$IP_VM-$IP_HW-$(date +"%Y_%m_%d_%I_%M_%p").txt
+
+touch "$LOG_FILE"
+
+
+if [[ $EUID -ne 0 ]]; then
+    echo "This script must be run as root"
+    exit 1
+fi
+
 
 hardware_platform()
 {
@@ -236,6 +245,21 @@ cd /config/mibs/current
 git branch -v >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 git log --pretty="%h, %ar : %s" -5 >> $LOG_FILE
+
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+echo "***ps -ef | grep git***" >> $LOG_FILE
+echo >> $LOG_FILE
+
+ps -ef | grep git >> $LOG_FILE
+
+echo >> $LOG_FILE
+
+
+echo "----------------------------------" >> $LOG_FILE
+
+ss -ltnp | grep 9418 >> $LOG_FILE
+
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 
 echo "=======================================================================================" >> $LOG_FILE
 
@@ -996,9 +1020,14 @@ echo | tee -a "$LOG_FILE"
 
 chmod 755 $LOG_FILE
 
-mv $LOG_FILE /tmp/SBC_LOG_INFO-$HOST_NAME-$theSerial-$IP_VM-$IP_HW-$(date +"%Y_%m_%d_%I_%M_%p").log
 
-echo "This script has completed, please check /tmp folder for SBC_LOG_INFO-* log to send to support" 
+
+echo "This script has completed........" 
+echo | tee -a "$LOG_FILE"
+echo | tee -a "$LOG_FILE"
+echo "---------------------------------------------------------------------------------------" | tee -a "$LOG_FILE"
+echo "Log File  : $LOG_FILE" | tee -a $LOG_FILE
+echo "==============================================" | tee -a $LOG_FILE
 
 exit 0;
 
