@@ -6,7 +6,7 @@ HOST_NAME=$(hostname)
 
 theSerial=$(dmidecode -t system | grep Serial | awk '{print $3}')
 
-LOG_FILE=/tmp/glassfish-SERVICE-$HOST_NAME.log
+LOG_FILE=/tmp/glassfish-SERVICE-$HOST_NAME-$theSerial-$(date +"%Y_%m_%d_%I_%M_%p").txt
 
 
 
@@ -160,14 +160,13 @@ echo | tee -a "$LOG_FILE"
 
 chmod 755 $LOG_FILE
 
-mv $LOG_FILE /tmp/glassfish-SERVICE-$HOST_NAME-$theSerial-$(date +"%Y_%m_%d_%I_%M_%p").log
 
+echo "This script has completed........" 
 echo | tee -a "$LOG_FILE"
-
 echo | tee -a "$LOG_FILE"
-
-
-echo "The script has completed please send log loacated in /tmp starting with glassfish-SERVICE to support ..." | tee -a $LOG_FILE
+echo "---------------------------------------------------------------------------------------" | tee -a "$LOG_FILE"
+echo "Log File  : $LOG_FILE" | tee -a $LOG_FILE
+echo "==============================================" | tee -a $LOG_FILE
 
 
 exit 0;
