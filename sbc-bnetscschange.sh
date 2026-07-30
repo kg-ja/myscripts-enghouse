@@ -1,5 +1,12 @@
 #!/bin/bash
 
+
+if [[ $EUID -ne 0 ]]; then
+    echo "This script must be run as root"
+    exit 1
+fi
+
+
 CURRENT_TIMESTAMP=$(date)
 HOST_NAME=$(hostname)
 theSerial=$(dmidecode -t system | grep Serial | awk '{print $3}')

@@ -2,6 +2,12 @@
 
 exec 2>/dev/null
 
+if [[ $EUID -ne 0 ]]; then
+    echo "This script must be run as root"
+    exit 1
+fi
+
+
 CURRENT_TIMESTAMP=$(date)
 HOST_NAME=$(hostname)
 theSerial=$(dmidecode -t system | grep Serial | awk '{print $3}')
@@ -11,6 +17,8 @@ IP_HW=$(ip addr show mgmt | grep "inet\b" | awk '{print $2}' | cut -d/ -f1 | hea
 Currentdirectory=$(pwd)
 
 LOG_FILE=/tmp/SBC_BNETSCS_GCORE-$HOST_NAME-$theSerial-$IP_VM-$IP_HW-$(date +"%Y_%m_%d_%I_%M_%p").log
+
+
 
 
 hardware_platform()
@@ -107,6 +115,11 @@ echo "--------------------------------------------------------------------------
 ls -ltrh >> "$LOG_FILE"
 echo "---------------------------------------------------------------------------------------" >> "$LOG_FILE"
 
-echo "This script has completed, please check $Currentdirectory folder for file starting with core.* and to send to support" 
+echo "This script has completed........" 
+echo | tee -a "$LOG_FILE"
+echo | tee -a "$LOG_FILE"
+echo "---------------------------------------------------------------------------------------" | tee -a "$LOG_FILE"
+echo "Log File  : $LOG_FILE" | tee -a $LOG_FILE
+echo "==============================================" | tee -a $LOG_FILE
 
 exit 0;
