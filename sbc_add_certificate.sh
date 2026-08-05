@@ -8,14 +8,18 @@ fi
 CURRENT_TIMESTAMP=$(date)
 HOST_NAME=$(hostname)
 theSerial=$(dmidecode -t system | grep Serial | awk '{print $3}')
-theIPaddressVM=$(ip addr show eth0 | grep "inet\b" | awk '{print $2}' | cut -d/ -f1 | head -n1)
-theIPaddressHW=$(ip addr show mgmt | grep "inet\b" | awk '{print $2}' | cut -d/ -f1 | head -n1)
+IP_VM=$(ip addr show eth0 | grep "inet\b" | awk '{print $2}' | cut -d/ -f1 | head -n1)
+IP_HW=$(ip addr show mgmt | grep "inet\b" | awk '{print $2}' | cut -d/ -f1 | head -n1)
+
 
 TMP_DIR="/tmp"
 CERT_DIR="/config/mibs/current/security/certificate"
-LOG_FILE="/tmp/add_sbc_certificate_$(date +%Y%m%d_%H%M%S).log"
+LOG_FILE="/tmp/add_sbc_certificate_$HOST_NAME-$theSerial-$IP_VM-$IP_HW-$(date +%Y%m%d_%H%M%S).log"
 BACKUP_DIR="/tmp/certificate_backup_$(date +%Y%m%d_%H%M%S)"
 
+SERVICE_STOPPED=0
+
+exec > >(tee -a "$LOG_FILE") 2>&1
 
 
 hardware_platform()
@@ -73,13 +77,6 @@ echo "==========================================================================
 }
 
 clear
-echo "=======================================================================================" > $LOG_FILE
-echo "***$CURRENT_TIMESTAMP-$HOST_NAME-$theIPaddressVM-$theIPaddressHW***" >> $LOG_FILE
-echo "=======================================================================================" >> $LOG_FILE
-
-SERVICE_STOPPED=0
-
-exec > >(tee -a "$LOGFILE") 2>&1
 
 
 #-------------------------------------------------------
@@ -107,9 +104,22 @@ fi
 
 echo "=============================================="
 echo "SBC Certificate Installation"
-echo "Started: $(date)"
+echo "Started: $CURRENT_TIMESTAMP"
 echo "Log: $LOGFILE"
-echo "=============================================="
+echo "=======================================================================================" >> $LOG_FILE
+echo "Hostname: $HOST_NAME" >> "$LOG_FILE"
+echo "VM MGMT IP: $IP_VM" >> "$LOG_FILE"
+echo "HP Mgmt IP: $IP_HW" >> "$LOG_FILE"
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+cat /opt/bnet/release_info >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+/opt/bnet/scripts/getVMVSystemInfo >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+/opt/bnet/scripts/swMgr Summary >> $LOG_FILE
+echo >> "$LOG_FILE"
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+echo "==========================================================================================================="
 
 
 #-------------------------------------------------------
@@ -286,7 +296,7 @@ else
 
 fi
 
-hardware_platform
+
 
 #-------------------------------------------------------
 # Confirm installation
