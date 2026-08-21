@@ -335,10 +335,24 @@ echo " =========================================================================
 echo "***GLASSFISH-INFO***" >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 echo "***GLASSFISH-SERVICE***" >> $LOG_FILE
-systemctl status glassfish  | grep "Active\b" >> $LOG_FILE
+systemctl status glassfish  >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 cd /opt/glassfish/glassfish/domains/domain1/logs
 ls -ltrh >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+
+echo "/opt/glassfish/glassfish/domains/domain1/config" >> $LOG_FILE 
+ls -ltrh /opt/glassfish/glassfish/domains/domain1/config  >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+echo "Check glassfish domain file" >> $LOG_FILE 
+
+if [ -s /opt/glassfish/glassfish/domains/domain1/config/domain.xml ]; then
+    echo "Domain.xml Has content" >> "$LOG_FILE"
+else
+    echo "Domain.xml Empty or does not exist" >> "$LOG_FILE"
+fi
+
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 echo "***GLASSFISH-LOG-SNIPPET***" >> $LOG_FILE
 tail -20 server.log >> $LOG_FILE
