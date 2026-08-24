@@ -278,9 +278,17 @@ echo " =========================================================================
 
 
 echo >> $LOG_FILE
-echo "***SYSTEM-UPGRADE-INFO***" >> $LOG_FILE
+echo "***SYSTEM-UPGRADE-HISTORY***" >> $LOG_FILE
 cd /var/adm/bnet
 cat bnethistory.log >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+echo >> $LOG_FILE
+echo "***SYSTEM-UPGRADE-LOG***" >> $LOG_FILE
+echo >> $LOG_FILE
+tail -20 /var/adm/bnet/bnetupgrade.log >> $LOG_FILE
+echo >> $LOG_FILE
+
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 echo "=======================================================================================" >> $LOG_FILE
 
 echo >> $LOG_FILE
