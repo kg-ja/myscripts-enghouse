@@ -11,7 +11,8 @@ EMSROLE=$(cat /var/adm/ems/server_role)
 IP_VM=$(ip addr show eth0 | grep "inet\b" | awk '{print $2}' | cut -d/ -f1 | head -n1)
 IP_HW=$(ip addr show eno1 | grep "inet\b" | awk '{print $2}' | cut -d/ -f1 | head -n1)
 
-LOG_FILE=/tmp/EMS_LOG_INFO-$HOST_NAME-$EMSROLE-$theSerial-$IP_VM-$IP_HW-$(date +"%Y_%m_%d_%I_%M_%p").txt
+LOG_FILE=/tmp/Viaero-EMS_LOG_INFO-$HOST_NAME-$EMSROLE-$theSerial-$IP_VM-$IP_HW-$(date +"%Y_%m_%d_%I_%M_%p").txt
+
 
 hardware_platform()
 {
@@ -286,6 +287,14 @@ echo "--------------------------------------------------------------------------
 echo "=======================================================================================" >> $LOG_FILE
 
 
+echo "***EMS-FEATURES***" >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+
+cat /var/log/dlgcld/dlgcld*.log | grep  GetUdf | tail -50 >> $LOG_FILE
+
+
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+
 
 echo "***EMS-LOG_SNIPPET***" >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
@@ -325,7 +334,7 @@ grep -i "Corrupted" /archive/log/ems/ems.log  | tail -10  >> $LOG_FILE
 echo "=======================================================================================" >> $LOG_FILE
 
 
-echo "***SBC-MESSAGES-LOG_SNIPPET***" >> $LOG_FILE
+echo "***EMS-MESSAGES-LOG_SNIPPET***" >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 
 grep -i "Drop" /var/log/messages | tail -10 >> $LOG_FILE
