@@ -11,7 +11,7 @@ EMSROLE=$(cat /var/adm/ems/server_role)
 IP_VM=$(ip addr show eth0 | grep "inet\b" | awk '{print $2}' | cut -d/ -f1 | head -n1)
 IP_HW=$(ip addr show eno1 | grep "inet\b" | awk '{print $2}' | cut -d/ -f1 | head -n1)
 
-LOG_FILE=/tmp/Viaero-EMS_LOG_INFO-$HOST_NAME-$EMSROLE-$theSerial-$IP_VM-$IP_HW-$(date +"%Y_%m_%d_%I_%M_%p").txt
+LOG_FILE=/tmp/EMS_LOG_INFO-$HOST_NAME-$EMSROLE-$theSerial-$IP_VM-$IP_HW-$(date +"%Y_%m_%d_%I_%M_%p").txt
 
 
 hardware_platform()
