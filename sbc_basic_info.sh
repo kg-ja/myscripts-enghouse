@@ -68,12 +68,24 @@ lscpu >> $LOG_FILE
 
 echo "=======================================================================================" >> $LOG_FILE
 echo "***MEMORY-PRINTOUT***" >> $LOG_FILE
-echo | tee -a "$LOG_FILE"
-dmidecode -t memory | grep -i 'Size:' | grep -v 'No Module Installed' | grep -i 'MB'  | awk '{sum += $2} END {print sum, "MB"}' >> $LOG_FILE
-echo | tee -a "$LOG_FILE"
-dmidecode -t memory | grep -i 'Size:' | grep -v 'No Module Installed' | grep -i 'GB'  | awk '{sum += $2} END {print sum, "GB"}' >> $LOG_FILE
-echo | tee -a "$LOG_FILE"
-echo | tee -a "$LOG_FILE"
+#echo | tee -a "$LOG_FILE"
+#dmidecode -t memory | grep -i 'Size:' | grep -v 'No Module Installed' | grep -i 'MB'  | awk '{sum += $2} END {print sum, "MB"}' >> $LOG_FILE
+#echo | tee -a "$LOG_FILE"
+#dmidecode -t memory | grep -i 'Size:' | grep -v 'No Module Installed' | grep -i 'GB'  | awk '{sum += $2} END {print sum, "GB"}' >> $LOG_FILE
+#echo | tee -a "$LOG_FILE"
+#$echo | tee -a "$LOG_FILE"
+
+dmidecode -t memory | awk '
+/^[[:space:]]*Size:/ {
+    if ($2 ~ /^[0-9]+([.][0-9]+)?$/) {
+        if ($3 == "MB") total_mb += $2
+        else if ($3 == "GB") total_mb += $2 * 1024
+        else if ($3 == "TB") total_mb += $2 * 1024 * 1024
+    }
+}
+END {
+    printf "Total Installed Memory: %.2f GB\n", total_mb / 1024
+}' >> "$LOG_FILE"
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 free -h >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
@@ -207,6 +219,10 @@ echo >> "$LOG_FILE"
 echo "7.STORAGE INFO" >> $LOG_FILE
 echo "***Full summary of available and used disk space usage of the file system***" >> $LOG_FILE
 df -h >> $LOG_FILE
+echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
+
+lsblk -o NAME,SIZE,TYPE,FSTYPE,MOUNTPOINT >> $LOG_FILE
+
 echo "=======================================================================================" >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 echo "***STORAGE-INFO***" >> $LOG_FILE
