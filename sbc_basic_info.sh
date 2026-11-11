@@ -218,7 +218,7 @@ storage_info ()
 echo >> "$LOG_FILE"
 echo "7.STORAGE INFO" >> $LOG_FILE
 echo "***Full summary of available and used disk space usage of the file system***" >> $LOG_FILE
-df -h >> $LOG_FILE
+df -hT >> $LOG_FILE
 echo "---------------------------------------------------------------------------------------" >> $LOG_FILE
 
 lsblk -o NAME,SIZE,TYPE,FSTYPE,MOUNTPOINT >> $LOG_FILE
